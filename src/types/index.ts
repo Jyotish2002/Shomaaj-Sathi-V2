@@ -13,9 +13,15 @@ export type ComplaintCategory =
 export interface User {
   id: string;
   name: string;
-  mobile: string;
-  wardNumber: number;
+  email: string;
+  mobile?: string;
+  address?: string;
+  photo?: string;
+  aadharPhoto?: string;
+  wardNumber?: number;
   role: UserRole;
+  isVerified: boolean;
+  isProfileComplete: boolean;
 }
 
 export interface Complaint {
@@ -31,6 +37,7 @@ export interface Complaint {
   wardNumber: number;
   status: ComplaintStatus;
   resolutionNote?: string;
+  resolvedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

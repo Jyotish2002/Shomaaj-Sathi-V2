@@ -36,13 +36,30 @@ export function useGeolocation() {
 
       const { latitude, longitude } = position.coords;
 
-      // Mock address for demo (in production, use reverse geocoding API)
-      const mockAddress = `Near Halisahar Station, Lat: ${latitude.toFixed(4)}, Long: ${longitude.toFixed(4)}`;
+      // Reverse geocoding using OpenStreetMap Nominatim API
+      let address = `Lat: ${latitude.toFixed(4)}, Long: ${longitude.toFixed(4)}`;
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
+          {
+            headers: {
+              'Accept-Language': 'en',
+              'User-Agent': 'HalisaharConnect/1.0'
+            }
+          }
+        );
+        const data = await response.json();
+        if (data.display_name) {
+          address = data.display_name;
+        }
+      } catch (geocodeError) {
+        console.error('Reverse geocoding failed:', geocodeError);
+      }
 
       setState({
         latitude,
         longitude,
-        address: mockAddress,
+        address,
         loading: false,
         error: null,
       });

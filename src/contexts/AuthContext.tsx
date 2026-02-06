@@ -1,48 +1,84 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, UserRole } from '@/types';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { User } from '@/types';
+import axios from 'axios';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (mobile: string, role: UserRole) => void;
+  token: string | null;
+  loginWithGoogle: (credential: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (data: Partial<User>) => Promise<void>;
+  checkAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demo
-const mockUsers: Record<string, User> = {
-  'citizen': {
-    id: 'user-1',
-    name: 'Rajesh Kumar',
-    mobile: '9876543210',
-    wardNumber: 5,
-    role: 'citizen',
-  },
-  'admin': {
-    id: 'admin-1',
-    name: 'Admin Officer',
-    mobile: '9999999999',
-    wardNumber: 1,
-    role: 'admin',
-  },
-};
+const API_URL = 'http://localhost:5000/api';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
 
-  const login = (mobile: string, role: UserRole) => {
-    // For demo, we'll use mock users
-    const mockUser = mockUsers[role];
-    setUser({ ...mockUser, mobile });
+  useEffect(() => {
+    if (token) {
+      checkAuth();
+    }
+  }, [token]);
+
+  const checkAuth = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/user/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUser(response.data);
+    } catch (error) {
+      logout();
+    }
+  };
+
+  const loginWithGoogle = async (credential: string) => {
+    try {
+      console.log('Attempting login with credential:', !!credential);
+      const response = await axios.post(`${API_URL}/auth/google`, { credential });
+      const { token, user } = response.data;
+      setToken(token);
+      setUser(user);
+      localStorage.setItem('token', token);
+    } catch (error) {
+      console.error('Login error detail:', error.response?.data || error.message);
+      throw error;
+    }
   };
 
   const logout = () => {
     setUser(null);
+    setToken(null);
+    localStorage.removeItem('token');
+  };
+
+  const updateProfile = async (data: Partial<User>) => {
+    try {
+      const response = await axios.put(`${API_URL}/user/profile`, data, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUser(response.data);
+    } catch (error) {
+      console.error('Profile update failed', error);
+      throw error;
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      isAuthenticated: !!user, 
+      token,
+      loginWithGoogle, 
+      logout,
+      updateProfile,
+      checkAuth
+    }}>
       {children}
     </AuthContext.Provider>
   );

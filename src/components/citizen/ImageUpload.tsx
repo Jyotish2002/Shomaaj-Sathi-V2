@@ -1,19 +1,46 @@
 import { useState, useRef } from 'react';
-import { Camera, Upload, X } from 'lucide-react';
+import { Camera, Upload, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import axios from 'axios';
 
 interface ImageUploadProps {
   value: string | null;
   onChange: (imageUrl: string | null) => void;
+  token?: string;
 }
 
-export function ImageUpload({ value, onChange }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, token }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileChange = (file: File | null) => {
-    if (file) {
+  const handleFileChange = async (file: File | null) => {
+    if (!file) return;
+
+    if (token) {
+      // Upload to Cloudinary
+      setIsUploading(true);
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        const response = await axios.post('http://localhost:5000/api/upload', formData, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        onChange(response.data.url);
+      } catch (error) {
+        console.error('Upload failed:', error);
+        alert('Failed to upload image. Please try again.');
+      } finally {
+        setIsUploading(false);
+      }
+    } else {
+      // Fallback to base64 if no token
       const reader = new FileReader();
       reader.onload = (e) => {
         onChange(e.target?.result as string);
@@ -42,6 +69,15 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
         >
           <X className="w-4 h-4" />
         </button>
+      </div>
+    );
+  }
+
+  if (isUploading) {
+    return (
+      <div className="border-2 border-dashed rounded-2xl p-8 text-center border-primary bg-secondary">
+        <Loader2 className="w-10 h-10 mx-auto animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground mt-4">Uploading image...</p>
       </div>
     );
   }

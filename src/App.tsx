@@ -20,10 +20,32 @@ import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
+import ProfileSetup from "@/pages/citizen/ProfileSetup";
+
 function ProtectedRoute({ children, role }: { children: React.ReactNode; role?: 'citizen' | 'admin' }) {
   const { isAuthenticated, user } = useAuth();
 
   if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  // Admin doesn't need profile setup
+  if (user?.role === 'admin') {
+    if (role && role !== 'admin') {
+      return <Navigate to="/admin" replace />;
+    }
+    return <>{children}</>;
+  }
+
+  // Allow access to profile-setup even if not verified
+  const isProfileSetupPage = window.location.pathname === '/citizen/profile-setup';
+
+  if (user && !user.isProfileComplete && !isProfileSetupPage) {
+    return <Navigate to="/citizen/profile-setup" replace />;
+  }
+
+  // Don't block unverified users from profile-setup page
+  if (user && !user.isVerified && !isProfileSetupPage && window.location.pathname !== '/') {
     return <Navigate to="/" replace />;
   }
 
@@ -44,8 +66,24 @@ function AppRoutes() {
         path="/" 
         element={
           isAuthenticated 
-            ? <Navigate to={user?.role === 'admin' ? '/admin' : '/citizen'} replace />
+            ? (user?.role === 'admin'
+                ? <Navigate to="/admin" replace />
+                : !user?.isProfileComplete
+                  ? <Navigate to="/citizen/profile-setup" replace />
+                  : user?.isVerified
+                    ? <Navigate to="/citizen" replace />
+                    : <Login />)
             : <Login />
+        } 
+      />
+
+      {/* Citizen Profile Setup */}
+      <Route 
+        path="/citizen/profile-setup" 
+        element={
+          <ProtectedRoute>
+            <ProfileSetup />
+          </ProtectedRoute>
         } 
       />
 

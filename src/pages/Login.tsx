@@ -1,39 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserRole } from '@/types';
-import { Phone, Shield, Loader2 } from 'lucide-react';
+import { Shield, Loader2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
-  const [mobile, setMobile] = useState('');
-  const [otp, setOtp] = useState('');
-  const [step, setStep] = useState<'mobile' | 'otp'>('mobile');
-  const [role, setRole] = useState<UserRole>('citizen');
+  const { loginWithGoogle, user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSendOTP = async () => {
-    if (mobile.length !== 10) return;
-    setLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setLoading(false);
-    setStep('otp');
-  };
+  useEffect(() => {
+    if (user) {
+      if (!user.isProfileComplete) {
+        navigate('/citizen/profile-setup');
+      } else if (!user.isVerified && user.role !== 'admin') {
+        // User is logged in but not verified, show message
+      } else {
+        navigate(user.role === 'admin' ? '/admin' : '/citizen');
+      }
+    }
+  }, [user, navigate]);
 
-  const handleVerifyOTP = async () => {
-    if (otp.length !== 6) return;
+  const handleGoogleSuccess = async (credentialResponse: any) => {
     setLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    login(mobile, role);
-    setLoading(false);
-    navigate(role === 'admin' ? '/admin' : '/citizen');
+    setError(null);
+    console.log('Google Success Callback Received');
+    try {
+      if (!credentialResponse.credential) {
+        throw new Error("No credential received from Google");
+      }
+      await loginWithGoogle(credentialResponse.credential);
+    } catch (err: any) {
+      console.error('Frontend Login Error:', err);
+      setError(err.response?.data?.message || err.message || "Login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,107 +51,50 @@ export default function Login() {
         <p className="text-primary-foreground/80 mt-2">Report and track local problems</p>
       </div>
 
-      {/* Login Form */}
-      <div className="flex-1 px-4 py-8 max-w-md mx-auto w-full">
-        <Tabs value={role} onValueChange={(v) => setRole(v as UserRole)} className="mb-6">
-          <TabsList className="grid w-full grid-cols-2 h-12">
-            <TabsTrigger value="citizen" className="text-base">
-              Citizen
-            </TabsTrigger>
-            <TabsTrigger value="admin" className="text-base">
-              Admin
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+      {/* Login Section */}
+      <div className="flex-1 px-4 py-8 max-w-md mx-auto w-full flex flex-col justify-center">
+        <div className="bg-card rounded-2xl p-8 shadow-card border border-border space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-semibold">Welcome Back</h2>
+            <p className="text-muted-foreground">
+              Please sign in with your Google account to continue
+            </p>
+          </div>
 
-        <div className="bg-card rounded-2xl p-6 shadow-card border border-border">
-          {step === 'mobile' ? (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold">Welcome</h2>
-                <p className="text-muted-foreground mt-1">
-                  Enter your mobile number to continue
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="mobile">Mobile Number</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    +91
-                  </span>
-                  <Input
-                    id="mobile"
-                    type="tel"
-                    placeholder="98765 43210"
-                    value={mobile}
-                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    className="pl-12 h-12 rounded-xl text-lg"
-                  />
-                </div>
-              </div>
-
-              <Button
-                onClick={handleSendOTP}
-                disabled={mobile.length !== 10 || loading}
-                className="w-full h-12 rounded-xl text-lg"
-              >
-                {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <>
-                    <Phone className="w-5 h-5 mr-2" />
-                    Send OTP
-                  </>
-                )}
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold">Verify OTP</h2>
-                <p className="text-muted-foreground mt-1">
-                  Enter the 6-digit code sent to +91 {mobile}
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="otp">OTP Code</Label>
-                <Input
-                  id="otp"
-                  type="text"
-                  placeholder="000000"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="h-12 rounded-xl text-center text-2xl tracking-widest"
-                />
-              </div>
-
-              <p className="text-sm text-center text-muted-foreground">
-                For demo, enter any 6 digits
-              </p>
-
-              <Button
-                onClick={handleVerifyOTP}
-                disabled={otp.length !== 6 || loading}
-                className="w-full h-12 rounded-xl text-lg"
-              >
-                {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  'Verify & Login'
-                )}
-              </Button>
-
-              <Button
-                variant="ghost"
-                onClick={() => setStep('mobile')}
-                className="w-full"
-              >
-                Change Number
-              </Button>
-            </div>
+          {user && !user.isVerified && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Verification Pending</AlertTitle>
+              <AlertDescription>
+                Your account is currently under review by the administrator. 
+                Please wait for verification to log in easily.
+              </AlertDescription>
+            </Alert>
           )}
+
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="flex justify-center">
+            {loading ? (
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            ) : (
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError("Google Login Failed")}
+                useOneTap
+              />
+            )}
+          </div>
+          
+          <p className="text-center text-xs text-muted-foreground">
+            By continuing, you agree to our Terms of Service and Privacy Policy.
+          </p>
         </div>
 
         {/* Info */}

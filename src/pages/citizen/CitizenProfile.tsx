@@ -2,7 +2,7 @@ import { Header } from '@/components/citizen/Header';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { User, Phone, MapPin, LogOut } from 'lucide-react';
+import { User, Phone, MapPin, LogOut, Mail } from 'lucide-react';
 
 export default function CitizenProfile() {
   const { user, logout } = useAuth();
@@ -21,9 +21,13 @@ export default function CitizenProfile() {
         {/* Profile Card */}
         <div className="bg-card rounded-2xl p-6 shadow-card border border-border">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center">
-              <User className="w-8 h-8 text-secondary-foreground" />
-            </div>
+            {user?.photo ? (
+              <img src={user.photo} alt={user.name} className="w-16 h-16 rounded-full object-cover" />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center">
+                <User className="w-8 h-8 text-secondary-foreground" />
+              </div>
+            )}
             <div>
               <h2 className="text-xl font-bold">{user?.name}</h2>
               <p className="text-muted-foreground">Citizen</p>
@@ -32,10 +36,18 @@ export default function CitizenProfile() {
 
           <div className="space-y-4">
             <div className="flex items-center gap-3 p-3 bg-secondary rounded-xl">
+              <Mail className="w-5 h-5 text-primary" />
+              <div>
+                <p className="text-xs text-muted-foreground">Email</p>
+                <p className="font-medium text-sm">{user?.email}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 bg-secondary rounded-xl">
               <Phone className="w-5 h-5 text-primary" />
               <div>
                 <p className="text-xs text-muted-foreground">Mobile Number</p>
-                <p className="font-medium">{user?.mobile}</p>
+                <p className="font-medium">{user?.mobile || 'Not set'}</p>
               </div>
             </div>
 
@@ -43,10 +55,22 @@ export default function CitizenProfile() {
               <MapPin className="w-5 h-5 text-primary" />
               <div>
                 <p className="text-xs text-muted-foreground">Ward Number</p>
-                <p className="font-medium">Ward {user?.wardNumber}</p>
+                <p className="font-medium">{user?.wardNumber ? `Ward ${user.wardNumber}` : 'Not set'}</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-secondary rounded-xl">
+              <MapPin className="w-5 h-5 text-primary mt-0.5" />
+              <div>
+                <p className="text-xs text-muted-foreground">Address</p>
+                <p className="font-medium text-sm">{user?.address || 'Not set'}</p>
               </div>
             </div>
           </div>
+
+          <p className="text-xs text-muted-foreground mt-4 text-center">
+            Profile details cannot be changed after initial setup. Contact admin for corrections.
+          </p>
         </div>
 
         {/* Help Section */}

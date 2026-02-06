@@ -22,14 +22,14 @@ import { toast } from 'sonner';
 
 export default function RegisterComplaint() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { addComplaint } = useComplaints();
   const { latitude, longitude, address, loading: locationLoading, error: locationError, getLocation } = useGeolocation();
 
   const [image, setImage] = useState<string | null>(null);
   const [category, setCategory] = useState<ComplaintCategory | null>(null);
   const [otherDescription, setOtherDescription] = useState('');
-  const [wardNumber, setWardNumber] = useState<string>(user?.wardNumber.toString() || '');
+  const [wardNumber, setWardNumber] = useState<string>(user?.wardNumber?.toString() || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -62,22 +62,23 @@ export default function RegisterComplaint() {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    addComplaint({
-      userId: user?.id || 'user-1',
-      category,
-      otherDescription: category === 'other' ? otherDescription : undefined,
-      imageUrl: image,
-      latitude,
-      longitude,
-      address: address || 'Location captured',
-      wardNumber: parseInt(wardNumber),
-    });
-
-    setIsSubmitting(false);
-    setShowSuccess(true);
+    try {
+      await addComplaint({
+        userId: user?.id || '',
+        category,
+        otherDescription: category === 'other' ? otherDescription : undefined,
+        imageUrl: image,
+        latitude,
+        longitude,
+        address: address || 'Location captured',
+        wardNumber: parseInt(wardNumber),
+      });
+      setShowSuccess(true);
+    } catch (error) {
+      toast.error('Failed to submit complaint');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (showSuccess) {
@@ -124,7 +125,7 @@ export default function RegisterComplaint() {
           {/* Image Upload */}
           <div className="space-y-2">
             <Label className="text-base font-semibold">Photo of Problem *</Label>
-            <ImageUpload value={image} onChange={setImage} />
+            <ImageUpload value={image} onChange={setImage} token={token || undefined} />
           </div>
 
           {/* Location */}
