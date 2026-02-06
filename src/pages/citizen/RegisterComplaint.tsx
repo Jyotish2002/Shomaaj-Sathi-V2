@@ -97,7 +97,7 @@ export default function RegisterComplaint() {
           <div className="space-y-3">
             <Button
               onClick={() => navigate('/citizen/complaints')}
-              className="w-full"
+              className="w-full h-12 rounded-xl font-semibold"
               size="lg"
             >
               View My Complaints
@@ -105,7 +105,7 @@ export default function RegisterComplaint() {
             <Button
               variant="outline"
               onClick={() => navigate('/citizen')}
-              className="w-full"
+              className="w-full h-12 rounded-xl font-semibold"
               size="lg"
             >
               Go to Home
@@ -117,48 +117,68 @@ export default function RegisterComplaint() {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30">
       <Header title="Register Complaint" />
 
-      <main className="px-4 -mt-4 max-w-lg mx-auto pb-8">
-        <form onSubmit={handleSubmit} className="space-y-6 bg-card rounded-2xl p-4 shadow-card border border-border">
+      <main className="px-4 -mt-6 max-w-lg mx-auto pb-8">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-card rounded-2xl p-5 shadow-lg border border-border animate-fade-in">
+          {/* Progress Steps */}
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className={`w-3 h-3 rounded-full ${image ? 'bg-primary' : 'bg-muted'} transition-colors`} />
+            <div className={`w-8 h-0.5 ${address ? 'bg-primary' : 'bg-muted'} transition-colors`} />
+            <div className={`w-3 h-3 rounded-full ${address ? 'bg-primary' : 'bg-muted'} transition-colors`} />
+            <div className={`w-8 h-0.5 ${wardNumber ? 'bg-primary' : 'bg-muted'} transition-colors`} />
+            <div className={`w-3 h-3 rounded-full ${wardNumber ? 'bg-primary' : 'bg-muted'} transition-colors`} />
+            <div className={`w-8 h-0.5 ${category ? 'bg-primary' : 'bg-muted'} transition-colors`} />
+            <div className={`w-3 h-3 rounded-full ${category ? 'bg-primary' : 'bg-muted'} transition-colors`} />
+          </div>
+          
           {/* Image Upload */}
-          <div className="space-y-2">
-            <Label className="text-base font-semibold">Photo of Problem *</Label>
+          <div className="space-y-3">
+            <Label className="text-base font-bold flex items-center gap-2">
+              📸 Photo of Problem
+              <span className="text-destructive">*</span>
+            </Label>
             <ImageUpload value={image} onChange={setImage} token={token || undefined} />
+            <p className="text-xs text-muted-foreground">Take a clear photo showing the problem</p>
           </div>
 
           {/* Location */}
-          <div className="space-y-2">
-            <Label className="text-base font-semibold">Location *</Label>
-            <div className="bg-secondary rounded-xl p-4">
+          <div className="space-y-3">
+            <Label className="text-base font-bold flex items-center gap-2">
+              📍 Location
+              <span className="text-destructive">*</span>
+            </Label>
+            <div className="bg-gradient-to-r from-secondary to-secondary/50 rounded-xl p-4 border border-border/50">
               {locationLoading ? (
                 <div className="flex items-center gap-3 text-muted-foreground">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Getting your location...</span>
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <span className="font-medium">Getting your location...</span>
                 </div>
               ) : locationError ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-destructive">
                     <AlertCircle className="w-5 h-5" />
-                    <span className="text-sm">{locationError}</span>
+                    <span className="text-sm font-medium">{locationError}</span>
                   </div>
-                  <Button type="button" variant="outline" onClick={getLocation} size="sm">
+                  <Button type="button" variant="outline" onClick={getLocation} size="sm" className="rounded-lg">
                     Try Again
                   </Button>
                 </div>
               ) : address ? (
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-primary mt-0.5" />
+                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-5 h-5 text-primary" />
+                  </div>
                   <div>
-                    <p className="text-sm font-medium">{address}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      GPS: {latitude?.toFixed(6)}, {longitude?.toFixed(6)}
+                    <p className="font-semibold text-foreground">{address}</p>
+                    <p className="text-xs text-muted-foreground mt-1 font-mono">
+                      📌 {latitude?.toFixed(6)}, {longitude?.toFixed(6)}
                     </p>
                   </div>
                 </div>
               ) : (
-                <Button type="button" variant="outline" onClick={getLocation}>
+                <Button type="button" variant="outline" onClick={getLocation} className="rounded-xl">
                   <MapPin className="w-4 h-4 mr-2" />
                   Get Location
                 </Button>
@@ -167,10 +187,13 @@ export default function RegisterComplaint() {
           </div>
 
           {/* Ward Number */}
-          <div className="space-y-2">
-            <Label className="text-base font-semibold">Ward Number *</Label>
+          <div className="space-y-3">
+            <Label className="text-base font-bold flex items-center gap-2">
+              🏘️ Ward Number
+              <span className="text-destructive">*</span>
+            </Label>
             <Select value={wardNumber} onValueChange={setWardNumber}>
-              <SelectTrigger className="h-12 rounded-xl">
+              <SelectTrigger className="h-14 rounded-xl bg-secondary/50 border-border/50 font-medium">
                 <SelectValue placeholder="Select your ward" />
               </SelectTrigger>
               <SelectContent>
@@ -185,20 +208,26 @@ export default function RegisterComplaint() {
           </div>
 
           {/* Category */}
-          <div className="space-y-2">
-            <Label className="text-base font-semibold">Problem Category *</Label>
+          <div className="space-y-3">
+            <Label className="text-base font-bold flex items-center gap-2">
+              📋 Problem Category
+              <span className="text-destructive">*</span>
+            </Label>
             <CategorySelect value={category} onChange={setCategory} />
           </div>
 
           {/* Other Description */}
           {category === 'other' && (
-            <div className="space-y-2 animate-fade-in">
-              <Label className="text-base font-semibold">Describe the Problem *</Label>
+            <div className="space-y-3 animate-slide-up">
+              <Label className="text-base font-bold flex items-center gap-2">
+                ✏️ Describe the Problem
+                <span className="text-destructive">*</span>
+              </Label>
               <Textarea
                 value={otherDescription}
                 onChange={(e) => setOtherDescription(e.target.value)}
                 placeholder="Please describe your problem in detail..."
-                className="min-h-[100px] rounded-xl"
+                className="min-h-[120px] rounded-xl bg-secondary/50 border-border/50"
               />
             </div>
           )}
@@ -206,7 +235,7 @@ export default function RegisterComplaint() {
           {/* Submit */}
           <Button
             type="submit"
-            className="w-full h-14 text-lg rounded-2xl"
+            className="w-full h-14 text-lg font-bold rounded-2xl shadow-lg bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90"
             disabled={isSubmitting}
           >
             {isSubmitting ? (
@@ -215,7 +244,7 @@ export default function RegisterComplaint() {
                 Submitting...
               </>
             ) : (
-              'Submit Complaint'
+              '🚀 Submit Complaint'
             )}
           </Button>
         </form>
