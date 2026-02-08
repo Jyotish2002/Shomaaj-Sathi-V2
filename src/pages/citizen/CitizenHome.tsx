@@ -1,4 +1,3 @@
-import { Header } from '@/components/citizen/Header';
 import { StatsCard } from '@/components/citizen/StatsCard';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,9 +17,23 @@ export default function CitizenHome() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30">
-      <Header showGreeting />
+      {/* Greeting Section */}
+      <div className="bg-gradient-to-r from-primary to-blue-600 px-4 py-5">
+        <div className="max-w-lg mx-auto">
+          <p className="text-white/80 text-sm font-medium">Welcome back,</p>
+          <h2 className="text-xl font-bold text-white mt-0.5">{user?.name || 'Citizen'}</h2>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-white">
+              📍 Ward {user?.wardNumber || '-'}
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-white">
+              🏛️ Halisahar
+            </span>
+          </div>
+        </div>
+      </div>
 
-      <main className="px-4 -mt-6 space-y-6 max-w-lg mx-auto pb-8">
+      <main className="px-4 py-6 space-y-6 max-w-lg mx-auto pb-8">
         {/* Quick Action Card */}
         <div className="bg-gradient-to-r from-primary to-blue-600 rounded-2xl p-5 shadow-lg animate-fade-in">
           <div className="flex items-center gap-3 mb-3">

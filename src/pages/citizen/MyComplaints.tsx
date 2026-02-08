@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Header } from '@/components/citizen/Header';
 import { ComplaintCard } from '@/components/citizen/ComplaintCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useComplaints } from '@/contexts/ComplaintsContext';
@@ -40,9 +39,12 @@ export default function MyComplaints() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30">
-      <Header title="My Complaints" />
+      {/* Page Title */}
+      <div className="bg-white border-b border-gray-100 px-4 py-4">
+        <h1 className="text-xl font-bold text-gray-900 max-w-lg mx-auto">My Complaints</h1>
+      </div>
 
-      <main className="px-4 -mt-6 space-y-4 max-w-lg mx-auto pb-8">
+      <main className="px-4 py-6 space-y-4 max-w-lg mx-auto pb-8">
         {/* Stats Summary */}
         <div className="bg-card rounded-2xl p-4 shadow-sm border border-border animate-fade-in">
           <div className="flex items-center gap-3 mb-3">

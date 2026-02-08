@@ -1,4 +1,3 @@
-import { Header } from '@/components/citizen/Header';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -15,9 +14,12 @@ export default function CitizenProfile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30">
-      <Header title="Profile" />
+      {/* Page Title */}
+      <div className="bg-white border-b border-gray-100 px-4 py-4">
+        <h1 className="text-xl font-bold text-gray-900 max-w-lg mx-auto">Profile</h1>
+      </div>
 
-      <main className="px-4 -mt-6 space-y-6 max-w-lg mx-auto pb-8">
+      <main className="px-4 py-6 space-y-6 max-w-lg mx-auto pb-8">
         {/* Profile Header Card */}
         <div className="bg-card rounded-2xl p-6 shadow-lg border border-border animate-fade-in">
           {/* Avatar and Name */}

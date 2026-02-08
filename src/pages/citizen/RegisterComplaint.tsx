@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/citizen/Header';
 import { ImageUpload } from '@/components/citizen/ImageUpload';
 import { CategorySelect } from '@/components/citizen/CategorySelect';
 import { Button } from '@/components/ui/button';
@@ -118,9 +117,12 @@ export default function RegisterComplaint() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30">
-      <Header title="Register Complaint" />
+      {/* Page Title */}
+      <div className="bg-white border-b border-gray-100 px-4 py-4">
+        <h1 className="text-xl font-bold text-gray-900 max-w-lg mx-auto">Register Complaint</h1>
+      </div>
 
-      <main className="px-4 -mt-6 max-w-lg mx-auto pb-8">
+      <main className="px-4 py-6 max-w-lg mx-auto pb-8">
         <form onSubmit={handleSubmit} className="space-y-6 bg-card rounded-2xl p-5 shadow-lg border border-border animate-fade-in">
           {/* Progress Steps */}
           <div className="flex items-center justify-center gap-2 mb-2">
