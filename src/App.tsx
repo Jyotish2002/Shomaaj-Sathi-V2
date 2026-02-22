@@ -16,6 +16,7 @@ import CitizenHome from "@/pages/citizen/CitizenHome";
 import RegisterComplaint from "@/pages/citizen/RegisterComplaint";
 import MyComplaints from "@/pages/citizen/MyComplaints";
 import CitizenProfile from "@/pages/citizen/CitizenProfile";
+import WaitingVerification from "@/pages/citizen/WaitingVerification";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import NotFound from "@/pages/NotFound";
 
@@ -34,6 +35,9 @@ function ProtectedRoute({
 }) {
   const { isAuthenticated, user } = useAuth();
   const location = useLocation();
+  
+  // Check language from user OR localStorage
+  const hasLanguage = user?.language || localStorage.getItem('appLanguage');
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
@@ -47,15 +51,15 @@ function ProtectedRoute({
     return <>{children}</>;
   }
 
-  // Citizen onboarding check
-  if (user && !user.language && location.pathname !== "/citizen/onboarding") {
+  // Citizen onboarding check - check both user.language AND localStorage
+  if (user && !hasLanguage && location.pathname !== "/citizen/onboarding") {
     return <Navigate to="/citizen/onboarding" replace />;
   }
 
   // Profile setup check (but allow manual return to onboarding)
   if (
     user &&
-    user.language &&
+    hasLanguage &&
     !user.isProfileComplete &&
     location.pathname !== "/citizen/profile-setup" &&
     location.pathname !== "/citizen/onboarding"
@@ -63,14 +67,14 @@ function ProtectedRoute({
     return <Navigate to="/citizen/profile-setup" replace />;
   }
 
-  // Verification check
+  // Verification check - allow waiting page for unverified users
   if (
     user &&
     user.isProfileComplete &&
     !user.isVerified &&
-    location.pathname !== "/"
+    location.pathname !== "/citizen/waiting"
   ) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/citizen/waiting" replace />;
   }
 
   // Role protection
@@ -100,7 +104,7 @@ function AppRoutes() {
                   ? <Navigate to="/citizen/profile-setup" replace />
                   : user?.isVerified
                     ? <Navigate to="/citizen" replace />
-                    : <Login />)
+                    : <Navigate to="/citizen/waiting" replace />)
             : <Login />
         }
       />
@@ -121,6 +125,16 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ProfileSetup />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Waiting Verification Route */}
+      <Route
+        path="/citizen/waiting"
+        element={
+          <ProtectedRoute>
+            <WaitingVerification />
           </ProtectedRoute>
         }
       />

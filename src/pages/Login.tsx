@@ -4,10 +4,13 @@ import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '@/contexts/AuthContext';
 import { Shield, Loader2, AlertCircle, CheckCircle2, MapPin, FileText, Users } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useTranslation } from 'react-i18next';
 
 
 // Loading Screen Component
 function LoadingScreen() {
+  const { t } = useTranslation();
+  
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-b from-primary to-teal-700 flex flex-col items-center justify-center">
       {/* Decorative background circles */}
@@ -54,13 +57,13 @@ function LoadingScreen() {
             <div className="w-2.5 h-2.5 rounded-full bg-white animate-bounce" style={{ animationDelay: '150ms' }} />
             <div className="w-2.5 h-2.5 rounded-full bg-white animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
-          <p className="text-white/80 text-sm font-medium">Signing you in...</p>
+          <p className="text-white/80 text-sm font-medium">{t('signingIn')}</p>
         </div>
 
         {/* Trust badge */}
         <div className="mt-12 flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
           <Shield className="w-4 h-4 text-white" />
-          <span className="text-white/90 text-xs font-medium">Secure Government Portal</span>
+          <span className="text-white/90 text-xs font-medium">{t('securePortal')}</span>
         </div>
       </div>
     </div>
@@ -72,6 +75,7 @@ export default function Login() {
   const { loginWithGoogle, user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (user) {
@@ -98,15 +102,15 @@ export default function Login() {
       await loginWithGoogle(credentialResponse.credential);
     } catch (err: any) {
       console.error('Frontend Login Error:', err);
-      setError(err.response?.data?.message || err.message || "Login failed. Please try again.");
+      setError(err.response?.data?.message || err.message || t('loginFailed'));
       setLoading(false);
     }
   };
 
   const features = [
-    { icon: MapPin, text: 'Report issues with GPS location' },
-    { icon: FileText, text: 'Track complaint status in real-time' },
-    { icon: CheckCircle2, text: 'Get notified when solved' },
+    { icon: MapPin, text: t('reportWithGPS') },
+    { icon: FileText, text: t('trackRealTime') },
+    { icon: CheckCircle2, text: t('getNotified') },
   ];
 
   // Show loading screen when authenticating
@@ -160,18 +164,18 @@ export default function Login() {
 
         <div className="bg-card rounded-2xl p-8 shadow-xl border border-border space-y-6 animate-slide-up">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold">Welcome Back</h2>
+            <h2 className="text-2xl font-bold">{t('welcomeBack')}</h2>
             <p className="text-muted-foreground">
-              Sign in with Google to continue
+              {t('signInWithGoogle')}
             </p>
           </div>
 
           {user && !user.isVerified && (
             <Alert variant="default" className="bg-amber-50 border-amber-200">
               <AlertCircle className="h-4 w-4 text-amber-600" />
-              <AlertTitle className="text-amber-800">Verification Pending</AlertTitle>
+              <AlertTitle className="text-amber-800">{t('verificationPending')}</AlertTitle>
               <AlertDescription className="text-amber-700">
-                Your account is under review. You'll be notified once verified.
+                {t('verificationPendingDesc')}
               </AlertDescription>
             </Alert>
           )}
@@ -179,7 +183,7 @@ export default function Login() {
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
+              <AlertTitle>{t('error')}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -188,7 +192,7 @@ export default function Login() {
             <div className="w-full flex justify-center py-2">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
-                onError={() => setError("Google Login Failed")}
+                onError={() => setError(t('loginFailed'))}
                 useOneTap
                 shape="pill"
                 size="large"
@@ -198,7 +202,7 @@ export default function Login() {
           </div>
           
           <p className="text-center text-xs text-muted-foreground">
-            By continuing, you agree to our Terms of Service and Privacy Policy.
+            {t('termsAndPrivacy')}
           </p>
         </div>
 
@@ -207,8 +211,8 @@ export default function Login() {
           <div className="inline-flex items-center gap-2 bg-secondary/50 px-4 py-2 rounded-full">
             <Users className="w-4 h-4 text-primary" />
             <div className="text-sm">
-              <span className="text-muted-foreground">An initiative by </span>
-              <span className="font-semibold text-foreground">Our Goverment</span>
+              <span className="text-muted-foreground">{t('initiativeBy')} </span>
+              <span className="font-semibold text-foreground">{t('ourGovernment')}</span>
             </div>
           </div>
         </div>

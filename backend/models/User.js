@@ -9,6 +9,9 @@ const userSchema = new mongoose.Schema({
   wardNumber: Number,
   photo: String, // URL to profile photo
   aadharPhoto: String, // URL to aadhar photo
+  language: String, // User's preferred language (en, hi, bn)
+  district: String, // User's district
+  municipality: String, // User's municipality
   role: { type: String, enum: ['citizen', 'admin'], default: 'citizen' },
   isVerified: { type: Boolean, default: false },
   isProfileComplete: { type: Boolean, default: false },

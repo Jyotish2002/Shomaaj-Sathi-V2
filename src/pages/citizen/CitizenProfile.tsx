@@ -1,22 +1,44 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { User, Phone, MapPin, LogOut, Mail, Shield, IdCard, CheckCircle2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { User, Phone, MapPin, LogOut, Mail, Shield, IdCard, CheckCircle2, Globe, ChevronDown } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function CitizenProfile() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    localStorage.getItem('appLanguage') || 'en'
+  );
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
+  const handleLanguageChange = (newLanguage: string) => {
+    setSelectedLanguage(newLanguage);
+    localStorage.setItem('appLanguage', newLanguage);
+    i18n.changeLanguage(newLanguage);
+    updateUser({ language: newLanguage });
+    toast.success(t('languageUpdated'));
+  };
+
+  const languages = [
+    { code: 'en', label: 'English', nativeLabel: 'English' },
+    { code: 'hi', label: 'Hindi', nativeLabel: 'हिंदी' },
+    { code: 'bn', label: 'Bengali', nativeLabel: 'বাংলা' },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30">
       {/* Page Title */}
       <div className="bg-white border-b border-gray-100 px-4 py-4">
-        <h1 className="text-xl font-bold text-gray-900 max-w-lg mx-auto">Profile</h1>
+        <h1 className="text-xl font-bold text-gray-900 max-w-lg mx-auto">{t('profile')}</h1>
       </div>
 
       <main className="px-4 py-6 space-y-6 max-w-lg mx-auto pb-8">
@@ -46,7 +68,7 @@ export default function CitizenProfile() {
             <div className="flex items-center gap-2 mt-2">
               <span className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
                 <Shield className="w-3.5 h-3.5" />
-                {user?.isVerified ? 'Verified Citizen' : 'Pending Verification'}
+                {user?.isVerified ? t('verifiedCitizen') : t('pendingVerification')}
               </span>
             </div>
           </div>
@@ -58,7 +80,7 @@ export default function CitizenProfile() {
                 <Mail className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Email</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t('email')}</p>
                 <p className="font-semibold text-foreground">{user?.email}</p>
               </div>
             </div>
@@ -68,8 +90,8 @@ export default function CitizenProfile() {
                 <Phone className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Mobile</p>
-                <p className="font-semibold text-foreground">{user?.mobile || 'Not set'}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t('mobile')}</p>
+                <p className="font-semibold text-foreground">{user?.mobile || t('notSet')}</p>
               </div>
             </div>
 
@@ -78,8 +100,8 @@ export default function CitizenProfile() {
                 <IdCard className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Ward Number</p>
-                <p className="font-semibold text-foreground">{user?.wardNumber ? `Ward ${user.wardNumber}` : 'Not set'}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t('wardNumber')}</p>
+                <p className="font-semibold text-foreground">{user?.wardNumber ? `${t('ward')} ${user.wardNumber}` : t('notSet')}</p>
               </div>
             </div>
 
@@ -88,24 +110,24 @@ export default function CitizenProfile() {
                 <MapPin className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Address</p>
-                <p className="font-semibold text-foreground text-sm">{user?.address || 'Not set'}</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{t('address')}</p>
+                <p className="font-semibold text-foreground text-sm">{user?.address || t('notSet')}</p>
               </div>
             </div>
           </div>
 
           <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
             <p className="text-xs text-amber-700 text-center font-medium">
-              ⚠️ Profile details cannot be changed after initial setup. Contact admin for corrections.
+              ⚠️ {t('profileWarning')}
             </p>
           </div>
         </div>
 
         {/* Contact Card */}
         <div className="bg-card rounded-2xl p-6 shadow-lg border border-border animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <h3 className="font-bold text-lg mb-3">Contact MLA Office</h3>
+          <h3 className="font-bold text-lg mb-3">{t('contactMLAOffice')}</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            For urgent matters or profile corrections, contact the MLA office directly.
+            {t('urgentMatters')}
           </p>
           <a href="tel:+919876543210">
             <Button variant="outline" className="w-full gap-2 h-12 rounded-xl font-semibold">
@@ -113,6 +135,41 @@ export default function CitizenProfile() {
               +91 98765 43210
             </Button>
           </a>
+        </div>
+
+        {/* Language Settings Card */}
+        <div className="bg-card rounded-2xl p-6 shadow-lg border border-border animate-slide-up" style={{ animationDelay: '0.15s' }}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+              <Globe className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">{t('languageSettings')}</h3>
+              <p className="text-sm text-muted-foreground">{t('changeLanguage')}</p>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            {languages.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => handleLanguageChange(lang.code)}
+                className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
+                  selectedLanguage === lang.code
+                    ? 'border-primary bg-primary/5 text-primary'
+                    : 'border-border hover:border-primary/50 hover:bg-secondary'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="font-medium">{lang.nativeLabel}</span>
+                  <span className="text-sm text-muted-foreground">({lang.label})</span>
+                </div>
+                {selectedLanguage === lang.code && (
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Logout Button */}
@@ -123,7 +180,7 @@ export default function CitizenProfile() {
           style={{ animationDelay: '0.2s' }}
         >
           <LogOut className="w-5 h-5" />
-          Logout
+          {t('logout')}
         </Button>
       </main>
     </div>

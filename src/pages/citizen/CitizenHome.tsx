@@ -2,6 +2,7 @@ import { StatsCard } from '@/components/citizen/StatsCard';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useComplaints } from '@/contexts/ComplaintsContext';
+import { useTranslation } from 'react-i18next';
 import { PlusCircle, ArrowRight, MapPin, Phone, Sparkles, Clock, CheckCircle2, Award, User, Calendar, Camera, Building2, Landmark } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { COMPLAINT_CATEGORIES } from '@/types';
@@ -11,6 +12,7 @@ export default function CitizenHome() {
   const { user } = useAuth();
   const { getStats, getComplaintsByUser } = useComplaints();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const stats = user ? getStats(user.id) : { total: 0, pending: 0, inProgress: 0, solved: 0 };
   const recentComplaints = user ? getComplaintsByUser(user.id).slice(0, 3) : [];
@@ -45,7 +47,7 @@ export default function CitizenHome() {
       {/* Greeting Section */}
       <div className="bg-gradient-to-r from-primary to-teal-600 px-4 py-5">
         <div className="max-w-lg mx-auto">
-          <p className="text-white/80 text-sm font-medium">Welcome back,</p>
+          <p className="text-white/80 text-sm font-medium">{t('welcomeBack')}</p>
           <h2 className="text-xl font-bold text-white mt-0.5">{user?.name || 'Citizen'}</h2>
           <div className="flex items-center gap-2 mt-2">
             <span className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-white">
@@ -76,8 +78,8 @@ export default function CitizenHome() {
               
               {/* Text */}
               <div className="flex-1 min-w-0">
-                <h3 className="text-white font-bold text-lg">Report an Issue</h3>
-                <p className="text-white/90 text-sm font-medium">Help Improve Your Ward!</p>
+                <h3 className="text-white font-bold text-lg">{t('reportIssue')}</h3>
+                <p className="text-white/90 text-sm font-medium">{t('helpImproveWard')}</p>
               </div>
               
               {/* Arrow Button */}
@@ -94,15 +96,15 @@ export default function CitizenHome() {
             <div className="flex items-center justify-center gap-6 mt-3 pt-3 border-t border-white/20">
               <div className="flex items-center gap-1.5 text-white/90 text-xs font-medium">
                 <MapPin className="w-3.5 h-3.5" />
-                <span>Location</span>
+                <span>{t('location')}</span>
               </div>
               <div className="flex items-center gap-1.5 text-white/90 text-xs font-medium">
                 <Camera className="w-3.5 h-3.5" />
-                <span>Photo</span>
+                <span>{t('photo')}</span>
               </div>
               <div className="flex items-center gap-1.5 text-white/90 text-xs font-medium">
                 <Building2 className="w-3.5 h-3.5" />
-                <span>Ward</span>
+                <span>{t('ward')}</span>
               </div>
             </div>
           </div>
@@ -122,8 +124,8 @@ export default function CitizenHome() {
                   <span className="text-2xl">📋</span>
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white tracking-tight">Your Complaints</h2>
-                  <p className="text-white/90 text-sm">Track your submitted issues</p>
+                  <h2 className="text-xl font-bold text-white tracking-tight">{t('yourComplaints')}</h2>
+                  <p className="text-white/90 text-sm">{t('trackIssues')}</p>
                 </div>
               </div>
               <Button
@@ -131,23 +133,23 @@ export default function CitizenHome() {
                 className="bg-white text-orange-600 hover:bg-white/90 font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105 rounded-xl"
                 size="sm"
               >
-                View All
+                {t('viewAll')}
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
           </div>
           
           <div className="grid grid-cols-2 gap-3">
-            <StatsCard label="Total" value={stats.total} variant="total" />
-            <StatsCard label="Solved" value={stats.solved} variant="solved" />
-            <StatsCard label="Pending" value={stats.pending} variant="pending" />
-            <StatsCard label="In Progress" value={stats.inProgress} variant="progress" />
+            <StatsCard label={t('total')} value={stats.total} variant="total" />
+            <StatsCard label={t('solved')} value={stats.solved} variant="solved" />
+            <StatsCard label={t('pending')} value={stats.pending} variant="pending" />
+            <StatsCard label={t('inProgress')} value={stats.inProgress} variant="progress" />
           </div>
         </section>
 
         {/* Recent Activity */}
         <section className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          <h2 className="text-lg font-bold text-foreground mb-4">Recent Activity</h2>
+          <h2 className="text-lg font-bold text-foreground mb-4">{t('recentActivity')}</h2>
 
           {recentComplaints.length > 0 ? (
             <div className="space-y-3">
@@ -187,7 +189,7 @@ export default function CitizenHome() {
                           >
                             {complaint.status === 'solved' && <CheckCircle2 className="w-3 h-3" />}
                             {complaint.status === 'pending' && <Clock className="w-3 h-3" />}
-                            {complaint.status === 'in-progress' ? 'In Progress' : complaint.status.charAt(0).toUpperCase() + complaint.status.slice(1)}
+                            {complaint.status === 'in-progress' ? t('inProgress') : complaint.status === 'pending' ? t('pending') : t('solved')}
                           </span>
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-1 flex items-center gap-1">

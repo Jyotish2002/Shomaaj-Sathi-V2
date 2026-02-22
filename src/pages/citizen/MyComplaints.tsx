@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ComplaintCard } from '@/components/citizen/ComplaintCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useComplaints } from '@/contexts/ComplaintsContext';
+import { useTranslation } from 'react-i18next';
 import { ComplaintStatus, COMPLAINT_CATEGORIES } from '@/types';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,6 +18,7 @@ import { cn } from '@/lib/utils';
 export default function MyComplaints() {
   const { user } = useAuth();
   const { getComplaintsByUser } = useComplaints();
+  const { t } = useTranslation();
   const [selectedComplaintId, setSelectedComplaintId] = useState<string | null>(null);
   const [filter, setFilter] = useState<ComplaintStatus | 'all'>('all');
 
@@ -31,10 +33,10 @@ export default function MyComplaints() {
     : null;
 
   const filters: { value: ComplaintStatus | 'all'; label: string; count: number }[] = [
-    { value: 'all', label: 'All', count: complaints.length },
-    { value: 'pending', label: 'Pending', count: complaints.filter(c => c.status === 'pending').length },
-    { value: 'in-progress', label: 'In Progress', count: complaints.filter(c => c.status === 'in-progress').length },
-    { value: 'solved', label: 'Solved', count: complaints.filter(c => c.status === 'solved').length },
+    { value: 'all', label: t('all'), count: complaints.length },
+    { value: 'pending', label: t('pending'), count: complaints.filter(c => c.status === 'pending').length },
+    { value: 'in-progress', label: t('inProgress'), count: complaints.filter(c => c.status === 'in-progress').length },
+    { value: 'solved', label: t('solved'), count: complaints.filter(c => c.status === 'solved').length },
   ];
 
   return (
@@ -51,8 +53,8 @@ export default function MyComplaints() {
               <FileText className="w-8 h-8 text-primary" />
             </div>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-white tracking-tight">Track Your Complaints</h1>
-              <p className="text-white/90 text-sm mt-1">Monitor the progress of all your submitted issues</p>
+              <h1 className="text-2xl font-bold text-white tracking-tight">{t('trackComplaints')}</h1>
+              <p className="text-white/90 text-sm mt-1">{t('monitorProgress')}</p>
             </div>
           </div>
         </div>
@@ -63,15 +65,15 @@ export default function MyComplaints() {
         <div className="grid grid-cols-3 gap-3 animate-fade-in">
           <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4 text-center border border-amber-200">
             <div className="text-2xl font-bold text-amber-700">{complaints.filter(c => c.status === 'pending').length}</div>
-            <div className="text-xs font-semibold text-amber-600 mt-1">Pending</div>
+            <div className="text-xs font-semibold text-amber-600 mt-1">{t('pending')}</div>
           </div>
           <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-4 text-center border border-teal-200">
             <div className="text-2xl font-bold text-teal-700">{complaints.filter(c => c.status === 'in-progress').length}</div>
-            <div className="text-xs font-semibold text-teal-600 mt-1">In Progress</div>
+            <div className="text-xs font-semibold text-teal-600 mt-1">{t('inProgress')}</div>
           </div>
           <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 text-center border border-green-200">
             <div className="text-2xl font-bold text-green-700">{complaints.filter(c => c.status === 'solved').length}</div>
-            <div className="text-xs font-semibold text-green-600 mt-1">Solved</div>
+            <div className="text-xs font-semibold text-green-600 mt-1">{t('solved')}</div>
           </div>
         </div>
 
@@ -124,13 +126,13 @@ export default function MyComplaints() {
             </div>
             <p className="text-foreground font-semibold">
               {filter === 'all'
-                ? 'No complaints found'
-                : `No ${filter} complaints`}
+                ? t('noComplaints')
+                : `${t('noComplaints')}`}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
               {filter === 'all' 
-                ? 'Register your first complaint to get started'
-                : 'Try changing the filter'}
+                ? t('registerFirst')
+                : t('tryChangingFilter')}
             </p>
           </div>
         )}
@@ -146,7 +148,7 @@ export default function MyComplaints() {
                   <span className="text-3xl">{category?.icon}</span>
                   <div>
                     <p className="text-lg font-bold">{category?.label}</p>
-                    <p className="text-xs text-muted-foreground font-normal">Complaint Details</p>
+                    <p className="text-xs text-muted-foreground font-normal">{t('complaintDetails')}</p>
                   </div>
                 </DialogTitle>
               </DialogHeader>

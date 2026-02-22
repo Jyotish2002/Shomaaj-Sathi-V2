@@ -16,6 +16,7 @@ import {
 import { Camera, MapPin, User, Contact, Loader2, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { WARD_NUMBERS } from '@/types';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 export default function ProfileSetup() {
   const { user, updateProfile, token } = useAuth();
@@ -23,6 +24,7 @@ export default function ProfileSetup() {
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [uploadingAadhar, setUploadingAadhar] = useState(false);
+  const { t } = useTranslation();
 
   const photoInputRef = useRef<HTMLInputElement>(null);
   const aadharInputRef = useRef<HTMLInputElement>(null);
@@ -111,11 +113,19 @@ export default function ProfileSetup() {
     setLoading(true);
 
     try {
+      // Include language and location from localStorage
+      const language = localStorage.getItem('appLanguage') || 'en';
+      const district = localStorage.getItem('district') || '';
+      const municipality = localStorage.getItem('municipality') || '';
+      
       await updateProfile({
         ...formData,
-        wardNumber: parseInt(formData.wardNumber)
+        wardNumber: parseInt(formData.wardNumber),
+        language,
+        district,
+        municipality,
       });
-      navigate("/");
+      navigate("/citizen/waiting");
     } catch (error) {
       console.error(error);
     } finally {
@@ -134,29 +144,29 @@ export default function ProfileSetup() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="text-center flex-1">
-            <h1 className="text-3xl font-bold">Complete Your Profile</h1>
-            <p className="text-muted-foreground">We need a few more details to verify your account</p>
+            <h1 className="text-3xl font-bold">{t('completeProfile')}</h1>
+            <p className="text-muted-foreground">{t('fewMoreDetails')}</p>
           </div>
           <div style={{ width: 40 }} />
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Profile Details</CardTitle>
-            <CardDescription>All fields are required for verification</CardDescription>
+            <CardTitle>{t('profileDetails')}</CardTitle>
+            <CardDescription>{t('allFieldsRequired')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">
-                  Full Name <span className="text-red-500">*</span>
+                  {t('fullName')} <span className="text-red-500">*</span>
                 </Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="name"
                     className="pl-10"
-                    placeholder="Enter your full name"
+                    placeholder={t('enterFullName')}
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
@@ -166,13 +176,13 @@ export default function ProfileSetup() {
 
               <div className="space-y-2">
                 <Label>
-                  Mobile Number <span className="text-red-500">*</span>
+                  {t('mobileNumber')} <span className="text-red-500">*</span>
                 </Label>
 
                 <div className="flex gap-2">
                   <Input
                     type="tel"
-                    placeholder="Enter your 10-digit mobile number"
+                    placeholder={t('enterMobile')}
                     value={formData.mobile}
                     onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                     maxLength={10}
@@ -186,14 +196,14 @@ export default function ProfileSetup() {
 
               <div className="space-y-2">
                 <Label htmlFor="address">
-                  Residential Address <span className="text-red-500">*</span>
+                  {t('residentialAddress')} <span className="text-red-500">*</span>
                 </Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Textarea
                     id="address"
                     className="pl-10 min-h-[100px]"
-                    placeholder="Enter your complete address"
+                    placeholder={t('enterAddress')}
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     required
@@ -225,14 +235,14 @@ export default function ProfileSetup() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <Label>
-                    Profile Photo <span className="text-red-500">*</span>
+                    {t('profilePhoto')} <span className="text-red-500">*</span>
                   </Label>                  <div
                     className={`border-2 border-dashed rounded-xl p-4 text-center space-y-2 transition-colors cursor-pointer relative overflow-hidden 
                     ${photoError ? "border-red-500 bg-red-50" : "hover:bg-muted/50"}`}
                     onClick={() => photoInputRef.current?.click()}
                   >
                     {photoError && (
-                      <p className="text-red-500 text-sm">Profile photo is required</p>
+                      <p className="text-red-500 text-sm">{t('photoRequired')}</p>
                     )}
                     {formData.photo ? (
                       <div className="relative">
@@ -244,7 +254,7 @@ export default function ProfileSetup() {
                     ) : (
                       <>
                         <Camera className="h-8 w-8 mx-auto text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground">Click to upload photo</p>
+                        <p className="text-xs text-muted-foreground">{t('clickToUpload')}</p>
                       </>
                     )}
                     <Input
@@ -259,7 +269,7 @@ export default function ProfileSetup() {
 
                 <div className="space-y-4">
                   <Label>
-                    Aadhar Card Photo <span className="text-red-500">*</span>
+                    {t('aadharPhoto')} <span className="text-red-500">*</span>
                   </Label>
                   <div
                     className={`border-2 border-dashed rounded-xl p-4 text-center space-y-2 transition-colors cursor-pointer relative overflow-hidden 
@@ -268,7 +278,7 @@ export default function ProfileSetup() {
                   >
 
                     {aadharError && (
-                      <p className="text-red-500 text-sm">Aadhar photo is required</p>
+                      <p className="text-red-500 text-sm">{t('aadharRequired')}</p>
                     )}
                     {formData.aadharPhoto ? (
                       <div className="relative">
@@ -280,7 +290,7 @@ export default function ProfileSetup() {
                     ) : (
                       <>
                         <Contact className="h-8 w-8 mx-auto text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground">Click to upload Aadhar Card</p>
+                        <p className="text-xs text-muted-foreground">{t('clickToUploadAadhar')}</p>
                       </>
                     )}
                     <Input
@@ -305,7 +315,7 @@ export default function ProfileSetup() {
                 }
               >
 
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Submit for Verification"}
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('submitForVerification')}
               </Button>
 
             </form>

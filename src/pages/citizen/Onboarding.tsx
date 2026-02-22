@@ -31,7 +31,7 @@ export default function Onboarding() {
   }, [language]);
   const handleNext = () => {
   if (!language || !district || !municipality) {
-    alert("Please select all fields");
+    alert(t('pleaseSelectAll'));
     return;
   }
 
@@ -53,27 +53,27 @@ export default function Onboarding() {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="bg-card p-8 rounded-xl shadow-lg w-full max-w-md space-y-6">
         <h2 className="text-2xl font-bold text-center">
-          Select Your Preferences
+          {t('selectPreferences')}
         </h2>
 
         {/* Language */}
         <div>
-          <label className="block mb-2 font-medium">Select Language</label>
+          <label className="block mb-2 font-medium">{t('selectLanguage')}</label>
           <select
             className="w-full border rounded p-2"
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
           >
-            <option value="">Choose</option>
-            <option value="en">English</option>
-            <option value="hi">Hindi</option>
-            <option value="bn">Bengali</option>
+            <option value="">{t('choose')}</option>
+            <option value="en">{t('english')}</option>
+            <option value="hi">{t('hindi')}</option>
+            <option value="bn">{t('bengali')}</option>
           </select>
         </div>
 
         {/* District */}
         <div>
-          <label className="block mb-2 font-medium">Select District</label>
+          <label className="block mb-2 font-medium">{t('selectDistrict')}</label>
           <select
             className="w-full border rounded p-2"
             value={district}
@@ -82,7 +82,7 @@ export default function Onboarding() {
               setMunicipality("");
             }}
           >
-            <option value="">Choose</option>
+            <option value="">{t('choose')}</option>
             {districts.map((d) => (
               <option key={d} value={d}>
                 {d}
@@ -93,14 +93,14 @@ export default function Onboarding() {
 
         {/* Municipality */}
         <div>
-          <label className="block mb-2 font-medium">Select Municipality</label>
+          <label className="block mb-2 font-medium">{t('selectMunicipality')}</label>
           <select
             className="w-full border rounded p-2"
             value={municipality}
             onChange={(e) => setMunicipality(e.target.value)}
             disabled={!district}
           >
-            <option value="">Choose</option>
+            <option value="">{t('choose')}</option>
             {municipalities.map((m) => (
               <option key={m} value={m}>
                 {m}
@@ -113,7 +113,7 @@ export default function Onboarding() {
           onClick={handleNext}
           className="w-full bg-primary text-white py-2 rounded"
         >
-          Next
+          {t('next')}
         </button>
       </div>
     </div>

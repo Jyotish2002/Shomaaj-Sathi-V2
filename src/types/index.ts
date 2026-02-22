@@ -19,6 +19,9 @@ export interface User {
   photo?: string;
   aadharPhoto?: string;
   wardNumber?: number;
+  language?: string;
+  district?: string;
+  municipality?: string;
   role: UserRole;
   isVerified: boolean;
   isProfileComplete: boolean;

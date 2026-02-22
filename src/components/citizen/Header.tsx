@@ -3,12 +3,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { User, LogOut, Bell, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+import { useTranslation } from 'react-i18next';
 const API_URL = import.meta.env.VITE_API_URL || 'https://shomaaj-sathi.onrender.com';
 
 
 export function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -103,7 +105,7 @@ export function Header() {
               Shomaaj Sathi
             </h2>
             <p className="text-xs text-gray-500 leading-tight">
-              Building a Better Tomorrow
+              {t('buildingBetterTomorrow')}
             </p>
           </div>
         </div>
@@ -152,7 +154,7 @@ export function Header() {
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                   <h3 className="text-sm font-semibold text-gray-800">
-                    Notifications
+                    {t('notifications')}
                   </h3>
                   <button onClick={() => setIsNotificationOpen(false)}>
                     <X className="w-4 h-4 text-gray-500" />
@@ -163,7 +165,7 @@ export function Header() {
                 <div className="max-h-64 overflow-y-auto">
                   {notifications.length === 0 ? (
                     <p className="text-sm text-gray-500 px-4 py-6 text-center">
-                      No notifications
+                      {t('noNotifications')}
                     </p>
                   ) : (
                     notifications.map((item) => (
@@ -217,13 +219,13 @@ export function Header() {
                   onClick={() => navigate('/citizen/profile')}
                   className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left"
                 >
-                  Profile
+                  {t('profile')}
                 </button>
                 <button
                   onClick={handleLogout}
                   className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left"
                 >
-                  Logout
+                  {t('logout')}
                 </button>
               </div>
             )}

@@ -1,8 +1,12 @@
 export const WEST_BENGAL_DATA: Record<string, string[]> = {
   "North 24 Parganas": [
-    "Halisahar Municipality",
     "Kanchrapara Municipality",
-    "Bhatpara Municipality"
+    "Halisahar Municipality",
+    "Naihati Municipality",
+    "Bhatpara Municipality",
+    "Kankinara Municipality",
+    "Jagatdal Municipality",
+    
   ],
   "Kolkata": [
     "Kolkata Municipal Corporation"
