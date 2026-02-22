@@ -5,6 +5,7 @@ const ComplaintSchema = new mongoose.Schema({
   category: { type: String, required: true },
   imageUrl: { type: String, required: true },
   imageUrls: { type: [String], default: [] },
+  voiceNoteUrl: { type: String },
   latitude: { type: Number, required: true },
   longitude: { type: Number, required: true },
   address: { type: String, required: true },

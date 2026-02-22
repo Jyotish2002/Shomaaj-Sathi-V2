@@ -24,6 +24,7 @@ import {
   Upload,
   X,
   Trash2,
+  Mic,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -876,6 +877,20 @@ export default function AdminDashboard() {
                         <p className="font-medium">{format(selectedComplaint.createdAt, 'dd MMM yyyy, hh:mm a')}</p>
                       </div>
                     </div>
+
+                    {/* Voice Note */}
+                    {selectedComplaint.voiceNoteUrl && (
+                      <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
+                        <p className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-2 flex items-center gap-2">
+                          <Mic className="w-4 h-4" /> Voice Note from Citizen
+                        </p>
+                        <audio controls className="w-full">
+                          <source src={selectedComplaint.voiceNoteUrl} type="audio/webm" />
+                          <source src={selectedComplaint.voiceNoteUrl} type="audio/mp4" />
+                          Your browser does not support the audio element.
+                        </audio>
+                      </div>
+                    )}
 
                     {/* Show solution if already solved */}
                     {selectedComplaint.status === 'solved' && selectedComplaint.solutionImageUrl && (

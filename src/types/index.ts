@@ -34,6 +34,7 @@ export interface Complaint {
   otherDescription?: string;
   imageUrl: string;
   imageUrls?: string[];
+  voiceNoteUrl?: string;
   solutionImageUrl?: string;
   latitude: number;
   longitude: number;

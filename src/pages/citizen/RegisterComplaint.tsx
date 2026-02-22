@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ImageUpload } from '@/components/citizen/ImageUpload';
+import { VoiceRecorder } from '@/components/citizen/VoiceRecorder';
 import { CategorySelect } from '@/components/citizen/CategorySelect';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,7 +18,7 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useComplaints } from '@/contexts/ComplaintsContext';
 import { ComplaintCategory, WARD_NUMBERS } from '@/types';
-import { MapPin, Loader2, CheckCircle, AlertCircle, Camera, Navigation, Building2, ClipboardList, Send, PenLine } from 'lucide-react';
+import { MapPin, Loader2, CheckCircle, AlertCircle, Camera, Navigation, Building2, ClipboardList, Send, PenLine, Mic } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function RegisterComplaint() {
@@ -28,6 +29,7 @@ export default function RegisterComplaint() {
   const { latitude, longitude, address, loading: locationLoading, error: locationError, getLocation } = useGeolocation();
 
   const [images, setImages] = useState<string[]>([]);
+  const [voiceNote, setVoiceNote] = useState<string>('');
   const [category, setCategory] = useState<ComplaintCategory | null>(null);
   const [otherDescription, setOtherDescription] = useState('');
   const [wardNumber, setWardNumber] = useState<string>(user?.wardNumber?.toString() || '');
@@ -70,6 +72,7 @@ export default function RegisterComplaint() {
         otherDescription: category === 'other' ? otherDescription : undefined,
         imageUrl: images[0],
         imageUrls: images,
+        voiceNoteUrl: voiceNote || undefined,
         latitude,
         longitude,
         address: address || 'Location captured',
@@ -224,6 +227,16 @@ export default function RegisterComplaint() {
               <span className="text-destructive">*</span>
             </Label>
             <CategorySelect value={category} onChange={setCategory} />
+          </div>
+
+          {/* Voice Note */}
+          <div className="space-y-3">
+            <Label className="text-base font-bold flex items-center gap-2">
+              <Mic className="w-4 h-4 text-primary" />
+              Voice Note (Optional)
+            </Label>
+            <VoiceRecorder value={voiceNote} onChange={setVoiceNote} token={token || undefined} />
+            <p className="text-xs text-muted-foreground">For citizens who can't type, record your problem</p>
           </div>
 
           {/* Other Description */}
