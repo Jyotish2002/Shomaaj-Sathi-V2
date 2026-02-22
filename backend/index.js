@@ -383,5 +383,16 @@ app.put('/api/admin/complaints/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// Admin: Delete Complaint
+app.delete('/api/admin/complaints/:id', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
+    await Complaint.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Complaint deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

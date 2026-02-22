@@ -8,6 +8,7 @@ interface ComplaintsContextType {
   loading: boolean;
   addComplaint: (complaint: Omit<Complaint, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => Promise<void>;
   updateComplaintStatus: (id: string, status: ComplaintStatus, solutionImageUrl?: string, resolutionNote?: string) => Promise<void>;
+  deleteComplaint: (id: string) => Promise<void>;
   getComplaintsByUser: (userId: string) => Complaint[];
   getStats: (userId?: string) => ComplaintStats;
   refreshComplaints: () => Promise<void>;
@@ -102,6 +103,19 @@ export function ComplaintsProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const deleteComplaint = async (id: string) => {
+    if (!token) return;
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/admin/complaints/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setComplaints((prev) => prev.filter((c) => c.id !== id));
+    } catch (error) {
+      console.error('Error deleting complaint:', error);
+      throw error;
+    }
+  };
+
   const getComplaintsByUser = (userId: string) => {
     return complaints.filter((c) => c.userId === userId);
   };
@@ -123,6 +137,7 @@ export function ComplaintsProvider({ children }: { children: ReactNode }) {
         loading,
         addComplaint,
         updateComplaintStatus,
+        deleteComplaint,
         getComplaintsByUser,
         getStats,
         refreshComplaints: fetchComplaints
