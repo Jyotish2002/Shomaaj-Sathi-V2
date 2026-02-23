@@ -181,7 +181,7 @@ if (!user) {
 
 // Update Profile
 app.put('/api/user/profile', authenticateToken, async (req, res) => {
-  const { name, mobile, address, wardNumber, photo, aadharPhoto } = req.body;
+  const { name, mobile, address, wardNumber, photo, aadharPhoto, language, district, municipality } = req.body;
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -192,6 +192,9 @@ app.put('/api/user/profile', authenticateToken, async (req, res) => {
     user.wardNumber = wardNumber;
     user.photo = photo || user.photo;
     user.aadharPhoto = aadharPhoto;
+    user.language = language || user.language;
+    user.district = district || user.district;
+    user.municipality = municipality || user.municipality;
     user.isProfileComplete = true;
     
     await user.save();

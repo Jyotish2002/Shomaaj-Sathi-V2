@@ -9,45 +9,66 @@ export default function Onboarding() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const [language, setLanguage] = useState<string>(() => {
     return user?.language || localStorage.getItem('appLanguage') || "";
   });
   const [district, setDistrict] = useState<string>(
-    localStorage.getItem('district') || ""
+    user?.district || localStorage.getItem('district') || ""
   );
   const [municipality, setMunicipality] = useState<string>(
-    localStorage.getItem('municipality') || ""
+    user?.municipality || localStorage.getItem('municipality') || ""
   );
+  const [loading, setLoading] = useState(false);
 
   const districts = Object.keys(WEST_BENGAL_DATA);
   const municipalities = district ? WEST_BENGAL_DATA[district] : [];
-  const { updateUser } = useAuth();
 
   useEffect(() => {
     if (language) {
       i18n.changeLanguage(language);
     }
   }, [language]);
-  const handleNext = () => {
-  if (!language || !district || !municipality) {
-    alert(t('pleaseSelectAll'));
-    return;
-  }
+  
+  const handleNext = async () => {
+    if (!language || !district || !municipality) {
+      alert(t('pleaseSelectAll'));
+      return;
+    }
 
-  localStorage.setItem("appLanguage", language);
-  localStorage.setItem("district", district);
-  localStorage.setItem("municipality", municipality);
+    localStorage.setItem("appLanguage", language);
+    localStorage.setItem("district", district);
+    localStorage.setItem("municipality", municipality);
 
-  // ✅ Update Auth user state
-  updateUser({
-    language: language,
-  });
+    i18n.changeLanguage(language);
 
-  i18n.changeLanguage(language);
-
-  navigate("/citizen/profile-setup");
-};
+    // If user already has a complete profile, just update language preferences
+    if (user?.isProfileComplete) {
+      setLoading(true);
+      try {
+        await updateProfile({
+          language,
+          district,
+          municipality,
+        });
+        
+        // Navigate based on verification status
+        if (!user.isVerified && user.role !== 'admin') {
+          navigate("/citizen/waiting");
+        } else {
+          navigate("/citizen");
+        }
+      } catch (error) {
+        console.error('Failed to update language preferences:', error);
+        alert(t('updateFailed') || 'Failed to update preferences');
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // New user, proceed to profile setup
+      navigate("/citizen/profile-setup");
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
@@ -111,9 +132,10 @@ export default function Onboarding() {
 
         <button
           onClick={handleNext}
-          className="w-full bg-primary text-white py-2 rounded"
+          disabled={loading}
+          className="w-full bg-primary text-white py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {t('next')}
+          {loading ? t('saving') || 'Saving...' : t('next')}
         </button>
       </div>
     </div>
