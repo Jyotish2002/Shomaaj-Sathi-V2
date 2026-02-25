@@ -242,3 +242,60 @@
     scrollbar-width: none;
   }
 }
+
+/* Google Translate Widget Styling */
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+.goog-logo-link {
+  display: none !important;
+}
+
+.goog-te-gadget {
+  color: transparent !important;
+}
+
+.goog-te-gadget .goog-te-combo {
+  color: #374151 !important;
+}
+
+/* Hide Google Translate branding in dropdown */
+#google_translate_element .goog-te-gadget-simple {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+#google_translate_element .goog-te-gadget-simple .goog-te-menu-value span {
+  color: #374151 !important;
+}
+
+/* Ensure page doesn't shift when Google Translate loads */
+body {
+  position: relative !important;
+}
+
+.skiptranslate iframe {
+  visibility: hidden !important;
+  height: 0 !important;
+}
+
+/* Prevent Google Translate auto-detection */
+.notranslate {
+  translate: no;
+}
+
+/* Force Google Translate to respect user language choice */
+.goog-te-combo option[selected] {
+  background-color: #e7f3ff !important;
+}
+
+/* Prevent auto-detection interference */
+html[lang="en"] body {
+  --google-translate-page-language: en;
+}

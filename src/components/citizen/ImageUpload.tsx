@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react';
-import { Camera, Upload, X, Loader2, Plus } from 'lucide-react';
+import { Camera, X, Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import axios from 'axios';
 
 interface ImageUploadProps {
@@ -13,7 +12,6 @@ interface ImageUploadProps {
 
 export function ImageUpload({ value = [], onChange, token, maxImages = 4 }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = async (file: File | null) => {
@@ -59,15 +57,6 @@ export function ImageUpload({ value = [], onChange, token, maxImages = 4 }: Imag
     onChange(newImages);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      handleFileChange(file);
-    }
-  };
-
   // Show uploaded images grid
   if (value.length > 0) {
     return (
@@ -95,7 +84,7 @@ export function ImageUpload({ value = [], onChange, token, maxImages = 4 }: Imag
             <button
               type="button"
               onClick={() => {
-                fileInputRef.current?.removeAttribute('capture');
+                fileInputRef.current?.setAttribute('capture', 'environment');
                 fileInputRef.current?.click();
               }}
               className="aspect-square rounded-xl border-2 border-dashed border-primary/50 bg-primary/5 hover:border-primary hover:bg-primary/10 transition-colors flex flex-col items-center justify-center gap-2"
@@ -138,18 +127,7 @@ export function ImageUpload({ value = [], onChange, token, maxImages = 4 }: Imag
   }
 
   return (
-    <div
-      className={cn(
-        'border-2 border-dashed rounded-2xl p-8 text-center transition-colors',
-        isDragging ? 'border-primary bg-secondary' : 'border-border'
-      )}
-      onDragOver={(e) => {
-        e.preventDefault();
-        setIsDragging(true);
-      }}
-      onDragLeave={() => setIsDragging(false)}
-      onDrop={handleDrop}
-    >
+    <div className="border-2 border-dashed rounded-2xl p-8 text-center border-border">
       <input
         ref={fileInputRef}
         type="file"
@@ -160,7 +138,7 @@ export function ImageUpload({ value = [], onChange, token, maxImages = 4 }: Imag
       />
 
       <div className="space-y-4">
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center">
           <Button
             type="button"
             variant="outline"
@@ -172,24 +150,11 @@ export function ImageUpload({ value = [], onChange, token, maxImages = 4 }: Imag
             }}
           >
             <Camera className="w-5 h-5" />
-            Camera
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            className="gap-2"
-            onClick={() => {
-              fileInputRef.current?.removeAttribute('capture');
-              fileInputRef.current?.click();
-            }}
-          >
-            <Upload className="w-5 h-5" />
-            Gallery
+            Take Photo
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">
-          Upload up to {maxImages} photos of the problem
+          Take up to {maxImages} photos of the problem
         </p>
       </div>
     </div>
