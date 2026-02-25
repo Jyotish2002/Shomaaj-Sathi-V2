@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { WEST_BENGAL_DATA } from "@/data/westBengal";
+import axios from 'axios';
 import { useAuth } from "@/contexts/AuthContext";
+
+const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 
 export default function Onboarding() {
@@ -10,19 +12,12 @@ export default function Onboarding() {
   const { t, i18n } = useTranslation();
 
   const { user, updateProfile } = useAuth();
+  const [epic, setEpic] = useState<string>(user?.epicNumber || "");
   const [language, setLanguage] = useState<string>(() => {
     return user?.language || localStorage.getItem('appLanguage') || "";
   });
-  const [district, setDistrict] = useState<string>(
-    user?.district || localStorage.getItem('district') || ""
-  );
-  const [municipality, setMunicipality] = useState<string>(
-    user?.municipality || localStorage.getItem('municipality') || ""
-  );
   const [loading, setLoading] = useState(false);
-
-  const districts = Object.keys(WEST_BENGAL_DATA);
-  const municipalities = district ? WEST_BENGAL_DATA[district] : [];
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (language) {
@@ -31,42 +26,57 @@ export default function Onboarding() {
   }, [language]);
   
   const handleNext = async () => {
-    if (!language || !district || !municipality) {
+    if (!epic || !language) {
       alert(t('pleaseSelectAll'));
       return;
     }
 
-    localStorage.setItem("appLanguage", language);
-    localStorage.setItem("district", district);
-    localStorage.setItem("municipality", municipality);
+    setLoading(true);
+    try {
+      // Fetch voter data by EPIC
+      const voterRes = await axios.get(`${API_URL}/voter/${epic}`);
+      const voter = voterRes.data;
 
-    i18n.changeLanguage(language);
+      // Prepare profile updates with voter data
+      // Always use official voter DB data (overrides Google name etc.)
+      const updateData: any = {
+        epicNumber: epic,
+        language,
+        name: voter.name,           // always use official voter name
+        mobile: voter.mobile,
+        address: voter.address,
+        wardNumber: voter.wardNumber,
+        district: voter.district,
+        municipality: voter.municipality,
+      };
 
-    // If user already has a complete profile, just update language preferences
-    if (user?.isProfileComplete) {
-      setLoading(true);
-      try {
-        await updateProfile({
-          language,
-          district,
-          municipality,
+      // Photo: prefer existing Google photo, otherwise voter record
+      if (!user?.photo && voter.photo) updateData.photo = voter.photo;
+      if (photoFile) {
+        // Upload photo via backend
+        const form = new FormData();
+        form.append('image', photoFile);
+        const uploadRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/upload`, form, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
-        
-        // Navigate based on verification status
-        if (!user.isVerified && user.role !== 'admin') {
-          navigate("/citizen/waiting");
-        } else {
-          navigate("/citizen");
-        }
-      } catch (error) {
-        console.error('Failed to update language preferences:', error);
-        alert(t('updateFailed') || 'Failed to update preferences');
-      } finally {
-        setLoading(false);
+        updateData.photo = uploadRes.data.url;
       }
-    } else {
-      // New user, proceed to profile setup
+
+      await updateProfile(updateData);
+      localStorage.setItem("appLanguage", language);
+      i18n.changeLanguage(language);
+
+      // Always navigate to profile setup after onboarding
       navigate("/citizen/profile-setup");
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        alert('EPIC number not found in database');
+      } else {
+        console.error('Onboarding error', error);
+        alert(t('updateFailed') || 'Failed to update preferences');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,6 +86,18 @@ export default function Onboarding() {
         <h2 className="text-2xl font-bold text-center">
           {t('selectPreferences')}
         </h2>
+
+        {/* EPIC number */}
+        <div>
+          <label className="block mb-2 font-medium">EPIC Number</label>
+          <input
+            type="text"
+            className="w-full border rounded p-2"
+            value={epic}
+            onChange={(e) => setEpic(e.target.value.trim())}
+            placeholder="XXXX0000000"
+          />
+        </div>
 
         {/* Language */}
         <div>
@@ -92,43 +114,19 @@ export default function Onboarding() {
           </select>
         </div>
 
-        {/* District */}
-        <div>
-          <label className="block mb-2 font-medium">{t('selectDistrict')}</label>
-          <select
-            className="w-full border rounded p-2"
-            value={district}
-            onChange={(e) => {
-              setDistrict(e.target.value);
-              setMunicipality("");
-            }}
-          >
-            <option value="">{t('choose')}</option>
-            {districts.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Municipality */}
-        <div>
-          <label className="block mb-2 font-medium">{t('selectMunicipality')}</label>
-          <select
-            className="w-full border rounded p-2"
-            value={municipality}
-            onChange={(e) => setMunicipality(e.target.value)}
-            disabled={!district}
-          >
-            <option value="">{t('choose')}</option>
-            {municipalities.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* optional photo upload if Google photo not present */}
+        {!user?.photo && (
+          <div className="space-y-2">
+            <label className="block mb-1 font-medium">Upload Profile Photo</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                if (e.target.files?.[0]) setPhotoFile(e.target.files[0]);
+              }}
+            />
+          </div>
+        )}
 
         <button
           onClick={handleNext}

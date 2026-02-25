@@ -19,6 +19,7 @@ export interface User {
   photo?: string;
   aadharPhoto?: string;
   wardNumber?: number;
+  epicNumber?: string;
   language?: string;
   district?: string;
   municipality?: string;

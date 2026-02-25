@@ -9,7 +9,8 @@ const multer = require('multer');
 const User = require('./models/User');
 const Complaint = require('./models/Complaint');
 const Alert = require('./models/Alert');
-
+const Voter = require('./models/Voter');
+const voterDetails = require('./voterDetails');
 
 const app = express();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -181,21 +182,30 @@ if (!user) {
 
 // Update Profile
 app.put('/api/user/profile', authenticateToken, async (req, res) => {
-  const { name, mobile, address, wardNumber, photo, aadharPhoto, language, district, municipality } = req.body;
+  const { name, mobile, address, wardNumber, epicNumber, photo, language, district, municipality } = req.body;
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    user.name = name || user.name;
-    user.mobile = mobile;
-    user.address = address;
-    user.wardNumber = wardNumber;
+    user.name = name || user.name; // voter name takes priority if provided
+    user.mobile = mobile || user.mobile;
+    user.address = address || user.address;
+    user.wardNumber = wardNumber || user.wardNumber;
+    if (epicNumber) user.epicNumber = epicNumber;
     user.photo = photo || user.photo;
-    user.aadharPhoto = aadharPhoto;
     user.language = language || user.language;
     user.district = district || user.district;
     user.municipality = municipality || user.municipality;
-    user.isProfileComplete = true;
+    
+    // Only mark profile as complete if all required fields are present
+    user.isProfileComplete = !!(
+      user.language && 
+      user.epicNumber && 
+      user.mobile && 
+      user.address && 
+      user.wardNumber && 
+      user.photo
+    );
     
     await user.save();
     res.json(user);
@@ -204,19 +214,17 @@ app.put('/api/user/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Admin verification (Internal or protected route)
-app.put('/api/admin/verify-user/:userId', authenticateToken, async (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
-  
-  try {
-    const user = await User.findById(req.params.userId);
-    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    user.isVerified = true;
-    await user.save();
-    res.json({ message: 'User verified successfully' });
+// Lookup voter by EPIC (for onboarding autocomplete)
+app.get('/api/voter/:epic', async (req, res) => {
+  try {
+    const epic = req.params.epic;
+    const voter = await Voter.findOne({ epicNumber: epic });
+    if (!voter) return res.status(404).json({ message: 'Voter EPIC not found' });
+    res.json(voter);
   } catch (error) {
-    res.status(500).json({ message: 'Error verifying user' });
+    console.error('Voter lookup error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -241,16 +249,6 @@ app.get('/api/admin/users', authenticateToken, async (req, res) => {
   }
 });
 
-// Admin: Verify user
-app.put('/api/admin/verify-user/:id', authenticateToken, async (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
-  try {
-    const user = await User.findByIdAndUpdate(req.params.id, { isVerified: true }, { new: true });
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: 'Error verifying user' });
-  }
-});
 
 // --- Complaint Routes ---
 
@@ -431,6 +429,48 @@ app.delete('/api/admin/complaints/:id', authenticateToken, async (req, res) => {
     res.json({ message: 'Complaint deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// ================= SEED VOTERS (FOR TESTING) =================
+app.post('/api/admin/seed-voters', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    // Check if voters already exist
+    const existingCount = await Voter.countDocuments();
+    if (existingCount > 0) {
+      return res.status(400).json({ message: `Database already has ${existingCount} voter records. Clear them first if you want to re-seed.` });
+    }
+
+    await Voter.insertMany(voterDetails);
+
+    res.status(201).json({
+      message: 'Successfully seeded voter database',
+      count: voterDetails.length
+    });
+
+  } catch (error) {
+    console.error('Seed error:', error);
+    res.status(500).json({ message: 'Failed to seed voters', error: error.message });
+  }
+});
+
+// ================= CLEAR ALL VOTERS (FOR TESTING) =================
+app.delete('/api/admin/clear-voters', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const result = await Voter.deleteMany({});
+    res.json({ message: 'All voters cleared', deletedCount: result.deletedCount });
+
+  } catch (error) {
+    console.error('Clear error:', error);
+    res.status(500).json({ message: 'Failed to clear voters' });
   }
 });
 

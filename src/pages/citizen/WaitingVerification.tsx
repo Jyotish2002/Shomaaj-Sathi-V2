@@ -31,7 +31,7 @@ export default function WaitingVerification() {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    window.location.href = '/';
   };
 
   // Show loading if user not loaded yet

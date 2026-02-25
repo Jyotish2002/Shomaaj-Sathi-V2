@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   address: String,
   wardNumber: Number,
   photo: String, // URL to profile photo
-  aadharPhoto: String, // URL to aadhar photo
+  epicNumber: String, // Voter EPIC number (optional)
   language: String, // User's preferred language (en, hi, bn)
   district: String, // User's district
   municipality: String, // User's municipality

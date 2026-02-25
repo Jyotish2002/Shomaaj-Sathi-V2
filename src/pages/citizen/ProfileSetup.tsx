@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Camera, MapPin, User, Contact, Loader2, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Camera, MapPin, User, Loader2, CheckCircle2, ArrowLeft, Lock } from 'lucide-react';
 import { WARD_NUMBERS } from '@/types';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
@@ -23,31 +23,27 @@ export default function ProfileSetup() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [uploadingAadhar, setUploadingAadhar] = useState(false);
   const { t } = useTranslation();
 
   const photoInputRef = useRef<HTMLInputElement>(null);
-  const aadharInputRef = useRef<HTMLInputElement>(null);
 
   const [photoError, setPhotoError] = useState(false);
-  const [aadharError, setAadharError] = useState(false);
+
+  // Check if user data came from EPIC voter database (read-only)
+  const isFromVoterDB = !!user?.epicNumber;
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
-    mobile: '',
-    address: '',
-    wardNumber: '',
-    photo: '',
-    aadharPhoto: '',
+    mobile: user?.mobile || '',
+    address: user?.address || '',
+    wardNumber: user?.wardNumber?.toString() || '',
+    photo: user?.photo || '',
   });
 
-  const uploadImage = async (file: File, type: 'photo' | 'aadhar') => {
+  const uploadImage = async (file: File) => {
     const formDataUpload = new FormData();
     formDataUpload.append('image', file);
-
-    if (type === 'photo') setUploadingPhoto(true);
-    else setUploadingAadhar(true);
-
+    setUploadingPhoto(true);
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/upload`, formDataUpload, {
         headers: {
@@ -55,33 +51,18 @@ export default function ProfileSetup() {
           'Content-Type': 'multipart/form-data'
         }
       });
-
-      if (type === 'photo') {
-        setFormData(prev => ({ ...prev, photo: response.data.url }));
-      } else {
-        setFormData(prev => ({ ...prev, aadharPhoto: response.data.url }));
-      }
+      setFormData(prev => ({ ...prev, photo: response.data.url }));
     } catch (error) {
       console.error('Upload failed:', error);
       alert('Failed to upload image. Please try again.');
     } finally {
-      if (type === 'photo') setUploadingPhoto(false);
-      else setUploadingAadhar(false);
+      setUploadingPhoto(false);
     }
   };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      uploadImage(file, 'photo');
-    }
-  };
-
-  const handleAadharChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      uploadImage(file, 'aadhar');
-    }
+    if (file) uploadImage(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,13 +75,6 @@ export default function ProfileSetup() {
       hasError = true;
     } else {
       setPhotoError(false);
-    }
-
-    if (!formData.aadharPhoto) {
-      setAadharError(true);
-      hasError = true;
-    } else {
-      setAadharError(false);
     }
 
     if (!formData.wardNumber) {
@@ -125,7 +99,7 @@ export default function ProfileSetup() {
         district,
         municipality,
       });
-      navigate("/citizen/waiting");
+      navigate("/citizen");
     } catch (error) {
       console.error(error);
     } finally {
@@ -154,6 +128,14 @@ export default function ProfileSetup() {
           <CardHeader>
             <CardTitle>{t('profileDetails')}</CardTitle>
             <CardDescription>{t('allFieldsRequired')}</CardDescription>
+            {isFromVoterDB && (
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-2">
+                <Lock className="h-4 w-4 text-blue-600 mt-0.5" />
+                <p className="text-sm text-blue-700">
+                  Your profile data is auto-filled from official voter records and cannot be edited. You can only update your photos.
+                </p>
+              </div>
+            )}
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -169,6 +151,7 @@ export default function ProfileSetup() {
                     placeholder={t('enterFullName')}
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    disabled={isFromVoterDB}
                     required
                   />
                 </div>
@@ -186,6 +169,7 @@ export default function ProfileSetup() {
                     value={formData.mobile}
                     onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                     maxLength={10}
+                    disabled={isFromVoterDB}
                     required
                   />
 
@@ -206,6 +190,7 @@ export default function ProfileSetup() {
                     placeholder={t('enterAddress')}
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    disabled={isFromVoterDB}
                     required
                   />
                 </div>
@@ -218,6 +203,7 @@ export default function ProfileSetup() {
                 <Select
                   value={formData.wardNumber}
                   onValueChange={(v) => setFormData({ ...formData, wardNumber: v })}
+                  disabled={isFromVoterDB}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select your ward" />
@@ -232,75 +218,38 @@ export default function ProfileSetup() {
                 </Select>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <Label>
-                    {t('profilePhoto')} <span className="text-red-500">*</span>
-                  </Label>                  <div
-                    className={`border-2 border-dashed rounded-xl p-4 text-center space-y-2 transition-colors cursor-pointer relative overflow-hidden 
-                    ${photoError ? "border-red-500 bg-red-50" : "hover:bg-muted/50"}`}
-                    onClick={() => photoInputRef.current?.click()}
-                  >
-                    {photoError && (
-                      <p className="text-red-500 text-sm">{t('photoRequired')}</p>
-                    )}
-                    {formData.photo ? (
-                      <div className="relative">
-                        <img src={formData.photo} alt="Profile" className="w-full h-32 object-cover rounded-lg" />
-                        <CheckCircle2 className="absolute top-2 right-2 h-6 w-6 text-green-500" />
-                      </div>
-                    ) : uploadingPhoto ? (
-                      <Loader2 className="h-8 w-8 mx-auto text-primary animate-spin" />
-                    ) : (
-                      <>
-                        <Camera className="h-8 w-8 mx-auto text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground">{t('clickToUpload')}</p>
-                      </>
-                    )}
-                    <Input
-                      ref={photoInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handlePhotoChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <Label>
-                    {t('aadharPhoto')} <span className="text-red-500">*</span>
-                  </Label>
-                  <div
-                    className={`border-2 border-dashed rounded-xl p-4 text-center space-y-2 transition-colors cursor-pointer relative overflow-hidden 
-                     ${aadharError ? "border-red-500 bg-red-50" : "hover:bg-muted/50"}`}
-                    onClick={() => aadharInputRef.current?.click()}
-                  >
-
-                    {aadharError && (
-                      <p className="text-red-500 text-sm">{t('aadharRequired')}</p>
-                    )}
-                    {formData.aadharPhoto ? (
-                      <div className="relative">
-                        <img src={formData.aadharPhoto} alt="Aadhar" className="w-full h-32 object-cover rounded-lg" />
-                        <CheckCircle2 className="absolute top-2 right-2 h-6 w-6 text-green-500" />
-                      </div>
-                    ) : uploadingAadhar ? (
-                      <Loader2 className="h-8 w-8 mx-auto text-primary animate-spin" />
-                    ) : (
-                      <>
-                        <Contact className="h-8 w-8 mx-auto text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground">{t('clickToUploadAadhar')}</p>
-                      </>
-                    )}
-                    <Input
-                      ref={aadharInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleAadharChange}
-                    />
-                  </div>
+              <div className="space-y-4">
+                <Label>
+                  {t('profilePhoto')} <span className="text-red-500">*</span>
+                </Label>
+                <div
+                  className={`border-2 border-dashed rounded-xl p-4 text-center space-y-2 transition-colors cursor-pointer relative overflow-hidden 
+                  ${photoError ? "border-red-500 bg-red-50" : "hover:bg-muted/50"}`}
+                  onClick={() => photoInputRef.current?.click()}
+                >
+                  {photoError && (
+                    <p className="text-red-500 text-sm">{t('photoRequired')}</p>
+                  )}
+                  {formData.photo ? (
+                    <div className="relative">
+                      <img src={formData.photo} alt="Profile" className="w-full h-32 object-cover rounded-lg" />
+                      <CheckCircle2 className="absolute top-2 right-2 h-6 w-6 text-green-500" />
+                    </div>
+                  ) : uploadingPhoto ? (
+                    <Loader2 className="h-8 w-8 mx-auto text-primary animate-spin" />
+                  ) : (
+                    <>
+                      <Camera className="h-8 w-8 mx-auto text-muted-foreground" />
+                      <p className="text-xs text-muted-foreground">{t('clickToUpload')}</p>
+                    </>
+                  )}
+                  <Input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePhotoChange}
+                  />
                 </div>
               </div>
 
@@ -309,13 +258,11 @@ export default function ProfileSetup() {
                 disabled={
                   loading ||
                   uploadingPhoto ||
-                  uploadingAadhar ||
-                  !formData.photo ||
-                  !formData.aadharPhoto
+                  !formData.photo
                 }
               >
 
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('submitForVerification')}
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('completeProfile') || 'Complete Profile'}
               </Button>
 
             </form>

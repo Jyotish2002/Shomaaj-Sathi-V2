@@ -18,7 +18,6 @@ import {
   Filter,
   Search,
   ShieldCheck,
-  UserCheck,
   Eye,
   Camera,
   Upload,
@@ -52,9 +51,10 @@ export default function AdminDashboard() {
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'alerts'>('dashboard');
 
-  const [unverifiedUsers, setUnverifiedUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [seedingVoters, setSeedingVoters] = useState(false);
 
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
   const [filterWard, setFilterWard] = useState<string>('all');
@@ -141,9 +141,10 @@ export default function AdminDashboard() {
       setAlertTime("");
       setAlertWard("all");
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      alert(error.response?.data?.message || "Failed to send alert");
+      const err = error as { response?: { data?: { message?: string } } };
+      alert(err.response?.data?.message || "Failed to send alert");
     }
   };
   useEffect(() => {
@@ -197,7 +198,7 @@ export default function AdminDashboard() {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setUnverifiedUsers(response.data);
+      setUsers(response.data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -211,16 +212,6 @@ export default function AdminDashboard() {
     }
   }, [activeTab, fetchUsers]);
 
-  const verifyUser = async (userId: string) => {
-    try {
-      await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/verify-user/${userId}`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      fetchUsers();
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
 
   const handleDeleteUser = async (userId: string) => {
@@ -249,6 +240,65 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Error removing user:", error);
       alert("Failed to remove user");
+    }
+  };
+
+  const handleSeedVoters = async () => {
+    const confirmSeed = window.confirm(
+      "This will add 15 dummy voter records to the database. Continue?"
+    );
+
+    if (!confirmSeed) return;
+
+    setSeedingVoters(true);
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.post(
+        `${API_URL}/api/admin/seed-voters`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert(response.data.message + ` (${response.data.count} voters added)`);
+
+    } catch (error: unknown) {
+      console.error("Seed error:", error);
+      const err = error as { response?: { data?: { message?: string } } };
+      alert(err.response?.data?.message || "Failed to seed voters");
+    } finally {
+      setSeedingVoters(false);
+    }
+  };
+
+  const handleClearVoters = async () => {
+    const confirmClear = window.confirm(
+      "⚠️ This will DELETE ALL voter records from the database. Are you sure?"
+    );
+
+    if (!confirmClear) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.delete(
+        `${API_URL}/api/admin/clear-voters`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert(response.data.message);
+
+    } catch (error) {
+      console.error("Clear error:", error);
+      alert("Failed to clear voters");
     }
   };
 
@@ -293,7 +343,7 @@ export default function AdminDashboard() {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    window.location.href = '/';
   };
 
   const selectedCategory = selectedComplaint
@@ -390,12 +440,12 @@ export default function AdminDashboard() {
     <div>
       <h1 className="text-2xl font-bold">
         {activeTab === "dashboard" && "Admin Dashboard"}
-        {activeTab === "users" && "User Verification"}
+        {activeTab === "users" && "Users"}
         {activeTab === "alerts" && "Send Public Alert"}
       </h1>
       <p className="text-muted-foreground">
         {activeTab === "dashboard" && "Manage civic complaints"}
-        {activeTab === "users" && "Verify citizen registrations"}
+        {activeTab === "users" && "Manage registered users"}
         {activeTab === "alerts" && "Send alerts to citizens"}
       </p>
     </div>
@@ -596,6 +646,43 @@ export default function AdminDashboard() {
         {/* USERS TAB */}
         {activeTab === 'users' && (
           <div className="space-y-6">
+            {/* Voter Database Management */}
+            <div className="bg-card rounded-xl p-4 border border-border shadow-card">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Users className="w-5 h-5 text-primary" />
+                Voter Database (Testing)
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Use these tools to populate the voter database with dummy data for testing the EPIC auto-fill feature.
+              </p>
+              <div className="flex gap-3">
+                <Button 
+                  onClick={handleSeedVoters} 
+                  disabled={seedingVoters}
+                  variant="outline"
+                >
+                  {seedingVoters ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Seeding...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Seed 15 Dummy Voters
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  onClick={handleClearVoters}
+                  variant="destructive"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Clear All Voters
+                </Button>
+              </div>
+            </div>
+
             <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -604,25 +691,24 @@ export default function AdminDashboard() {
                       <th className="text-left p-4 font-medium">User</th>
                       <th className="text-left p-4 font-medium">Address</th>
                       <th className="text-left p-4 font-medium">Documents</th>
-                      <th className="text-left p-4 font-medium">Status</th>
                       <th className="text-left p-4 font-medium">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {loadingUsers ? (
                       <tr>
-                        <td colSpan={5} className="p-8 text-center">
+                        <td colSpan={4} className="p-8 text-center">
                           <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
                         </td>
                       </tr>
-                    ) : unverifiedUsers.length === 0 ? (
+                    ) : users.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="p-8 text-center text-muted-foreground">
-                          No unverified users found.
+                        <td colSpan={4} className="p-8 text-center text-muted-foreground">
+                          No users found.
                         </td>
                       </tr>
                     ) : (
-                      unverifiedUsers.map((u) => (
+                      users.map((u) => (
                         <tr key={u.id} className="border-t border-border hover:bg-muted/30">
                           <td className="p-4">
                             <div className="flex items-center gap-3">
@@ -644,23 +730,7 @@ export default function AdminDashboard() {
                               <Eye className="w-4 h-4 mr-1" /> View Details
                             </Button>
                           </td>
-                          <td className="p-4">
-                            {u.isVerified ? (
-                              <span className="flex items-center text-green-600 text-sm">
-                                <ShieldCheck className="w-4 h-4 mr-1" /> Verified
-                              </span>
-                            ) : (
-                              <span className="flex items-center text-amber-600 text-sm">
-                                <Clock className="w-4 h-4 mr-1" /> Pending
-                              </span>
-                            )}
-                          </td>
                           <td className="p-4 space-x-2">
-                            {!u.isVerified && (
-                              <Button size="sm" onClick={() => verifyUser(u.id)}>
-                                <UserCheck className="w-4 h-4 mr-1" /> Verify
-                              </Button>
-                            )}
 
                             <Button
                               size="sm"
@@ -774,9 +844,9 @@ export default function AdminDashboard() {
             {alerts.length === 0 ? (
               <p className="text-gray-500">No alerts sent yet.</p>
             ) : (
-              alerts.map((alert: any) => (
+              alerts.map((alert: { id: string; _id?: string; title: string; message: string; date: string; time: string; ward: string; createdAt: string }) => (
                 <div
-                  key={alert._id}
+                  key={alert._id || alert.id}
                   className="bg-white shadow-sm border border-gray-200 rounded-lg p-4 mb-3"
                 >
                   <div className="flex justify-between items-start">
@@ -793,7 +863,7 @@ export default function AdminDashboard() {
                     </div>
 
                     <button
-                      onClick={() => handleDeleteAlert(alert._id)}
+                      onClick={() => handleDeleteAlert(alert._id || alert.id)}
                       className="text-red-600 text-sm hover:underline"
                     >
                       Remove
@@ -1031,24 +1101,6 @@ export default function AdminDashboard() {
                   <p className="text-xs text-muted-foreground text-center">Click to view full size</p>
                 </div>
 
-                {/* Aadhar Card - Large */}
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-sm text-muted-foreground">Aadhar Card Photo</h3>
-                  <div className="bg-muted rounded-xl p-2 flex justify-center">
-                    {selectedUser.aadharPhoto ? (
-                      <img
-                        src={selectedUser.aadharPhoto}
-                        alt="Aadhar Card"
-                        className="max-w-full max-h-[300px] object-contain rounded-lg cursor-pointer"
-                        onClick={() => window.open(selectedUser.aadharPhoto, '_blank')}
-                      />
-                    ) : (
-                      <p className="text-muted-foreground py-8">No Aadhar photo uploaded</p>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground text-center">Click to view full size</p>
-                </div>
-
                 {/* User Details */}
                 <div className="grid grid-cols-2 gap-4 bg-secondary/50 rounded-xl p-4">
                   <div>
@@ -1077,18 +1129,7 @@ export default function AdminDashboard() {
 
                 {/* Actions */}
                 <div className="flex gap-3">
-                  {!selectedUser.isVerified && (
-                    <Button
-                      className="flex-1"
-                      onClick={() => {
-                        verifyUser(selectedUser.id);
-                        setSelectedUser(null);
-                      }}
-                    >
-                      <UserCheck className="w-4 h-4 mr-2" /> Verify User
-                    </Button>
-                  )}
-                  <Button variant="outline" onClick={() => setSelectedUser(null)} className={selectedUser.isVerified ? 'flex-1' : ''}>
+                  <Button variant="outline" onClick={() => setSelectedUser(null)}>
                     Close
                   </Button>
                 </div>

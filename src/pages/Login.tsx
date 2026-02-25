@@ -79,12 +79,10 @@ export default function Login() {
 
   useEffect(() => {
     if (user) {
-      if (!user.language) {
+      if (!user.language || !user.epicNumber) {
         navigate('/citizen/onboarding');
       } else if (!user.isProfileComplete) {
         navigate('/citizen/profile-setup');
-      } else if (!user.isVerified && user.role !== 'admin') {
-        // User is logged in but not verified, show message
       } else {
         navigate(user.role === 'admin' ? '/admin' : '/citizen');
       }
@@ -170,15 +168,6 @@ export default function Login() {
             </p>
           </div>
 
-          {user && !user.isVerified && (
-            <Alert variant="default" className="bg-amber-50 border-amber-200">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-              <AlertTitle className="text-amber-800">{t('verificationPending')}</AlertTitle>
-              <AlertDescription className="text-amber-700">
-                {t('verificationPendingDesc')}
-              </AlertDescription>
-            </Alert>
-          )}
 
           {error && (
             <Alert variant="destructive">

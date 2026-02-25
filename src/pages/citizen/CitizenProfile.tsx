@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { User, Phone, MapPin, LogOut, Mail, Shield, IdCard, CheckCircle2, Globe, ChevronDown } from 'lucide-react';
+import { User, Phone, MapPin, LogOut, Mail, IdCard, Globe, ChevronDown, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function CitizenProfile() {
@@ -17,7 +17,7 @@ export default function CitizenProfile() {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    window.location.href = '/';
   };
 
   const handleLanguageChange = (newLanguage: string) => {
@@ -58,19 +58,8 @@ export default function CitizenProfile() {
                   <User className="w-12 h-12 text-white" />
                 </div>
               )}
-              {user?.isVerified && (
-                <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-4 border-card">
-                  <CheckCircle2 className="w-4 h-4 text-white" />
-                </div>
-              )}
             </div>
             <h2 className="text-2xl font-bold mt-4">{user?.name}</h2>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
-                <Shield className="w-3.5 h-3.5" />
-                {user?.isVerified ? t('verifiedCitizen') : t('pendingVerification')}
-              </span>
-            </div>
           </div>
 
           {/* Info Cards */}
