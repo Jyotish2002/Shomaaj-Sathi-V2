@@ -6,6 +6,7 @@ import { ComplaintStatus, COMPLAINT_CATEGORIES, WARD_NUMBERS, Complaint, User } 
 import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL || 'https://shomaaj-sathi.onrender.com';
 import { Menu } from "lucide-react";
+import { StatsCard } from '@/components/citizen/StatsCard';
 
 import {
   Users,
@@ -461,22 +462,10 @@ export default function AdminDashboard() {
           <>
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <div className="bg-card rounded-xl p-4 border border-border shadow-card">
-                <p className="text-3xl font-bold text-primary">{stats.total}</p>
-                <p className="text-sm text-muted-foreground">Total Complaints</p>
-              </div>
-              <div className="bg-card rounded-xl p-4 border border-border shadow-card">
-                <p className="text-3xl font-bold text-status-pending">{stats.pending}</p>
-                <p className="text-sm text-muted-foreground">Pending</p>
-              </div>
-              <div className="bg-card rounded-xl p-4 border border-border shadow-card">
-                <p className="text-3xl font-bold text-status-progress">{stats.inProgress}</p>
-                <p className="text-sm text-muted-foreground">In Progress</p>
-              </div>
-              <div className="bg-card rounded-xl p-4 border border-border shadow-card">
-                <p className="text-3xl font-bold text-status-solved">{stats.solved}</p>
-                <p className="text-sm text-muted-foreground">Solved</p>
-              </div>
+              <StatsCard label="Total Complaints" value={stats.total} variant="total" />
+              <StatsCard label="Pending" value={stats.pending} variant="pending" />
+              <StatsCard label="In Progress" value={stats.inProgress} variant="progress" />
+              <StatsCard label="Solved" value={stats.solved} variant="solved" />
             </div>
 
             {/* Filters */}
