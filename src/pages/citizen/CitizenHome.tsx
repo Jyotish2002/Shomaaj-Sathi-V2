@@ -56,7 +56,7 @@ export default function CitizenHome() {
             </span>
             <span className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-white">
               <Landmark className="w-3.5 h-3.5" />
-              Halisahar
+              Naihati
             </span>
           </div>
         </div>
@@ -308,7 +308,7 @@ export default function CitizenHome() {
                 {/* Bio Paragraph */}
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   With over 15 years of dedicated public service, Hon. Ramesh Verma has been instrumental 
-                  in bringing transformative development to Halisahar. His vision focuses on infrastructure 
+                  in bringing transformative development to Naihati. His vision focuses on infrastructure 
                   modernization, improved civic amenities, and ensuring dignified quality of life for every citizen.
                 </p>
               </div>

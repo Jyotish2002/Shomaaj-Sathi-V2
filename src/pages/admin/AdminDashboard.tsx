@@ -365,7 +365,7 @@ export default function AdminDashboard() {
 >
   <div className="p-6">
     <h1 className="text-xl font-bold text-primary">Admin Panel</h1>
-    <p className="text-sm text-muted-foreground">Halisahar Civic Portal</p>
+    <p className="text-sm text-muted-foreground">Naihati Civic Portal</p>
   </div>
 
   <nav className="px-3 space-y-1">

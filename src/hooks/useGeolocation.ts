@@ -44,7 +44,7 @@ export function useGeolocation() {
           {
             headers: {
               'Accept-Language': 'en',
-              'User-Agent': 'HalisaharConnect/1.0'
+              'User-Agent': 'NaihatiConnect/1.0'
             }
           }
         );

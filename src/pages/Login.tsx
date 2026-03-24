@@ -47,7 +47,7 @@ function LoadingScreen() {
         {/* Text */}
         <div className="mt-8 text-center">
           <h1 className="text-2xl font-bold text-white tracking-tight">Shomaaj</h1>
-          <p className="text-white/70 mt-1 text-sm">Halisahar</p>
+          <p className="text-white/70 mt-1 text-sm">Naihati</p>
         </div>
 
         {/* Loading indicator */}

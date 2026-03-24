@@ -4,7 +4,7 @@ const voterDetails = [
     name: 'Rajesh Kumar Singh',
     fatherName: 'Ramesh Singh',
     mobile: '9876543210',
-    address: 'Plot 45, Rabindranath Tagore Road, Halisahar',
+    address: 'Plot 45, Rabindranath Tagore Road, Naihati',
     wardNumber: 5,
     district: 'North 24 Parganas',
     municipality: 'Halisahar'
@@ -14,7 +14,7 @@ const voterDetails = [
     name: 'Priya Sharma',
     fatherName: 'Vijay Sharma',
     mobile: '9876543211',
-    address: '12/A, Gandhi Street, Halisahar',
+    address: '12/A, Gandhi Street, Naihati',
     wardNumber: 3,
     district: 'North 24 Parganas',
     municipality: 'Halisahar'
@@ -24,7 +24,7 @@ const voterDetails = [
     name: 'Amit Das',
     fatherName: 'Subhas Das',
     mobile: '9876543212',
-    address: '78, Netaji Subhas Road, Halisahar',
+    address: '78, Netaji Subhas Road, Naihati',
     wardNumber: 7,
     district: 'North 24 Parganas',
     municipality: 'Halisahar'
@@ -34,7 +34,7 @@ const voterDetails = [
     name: 'Shubham Chowdhury',
     fatherName: 'Siv Narayan Chowdhury',
     mobile: '9876543213',
-    address: '34, B.T. Road, Halisahar',
+    address: '34, B.T. Road, Naihati',
     wardNumber: 12,
     district: 'North 24 Parganas',
     municipality: 'Halisahar'
@@ -44,7 +44,7 @@ const voterDetails = [
     name: 'Sanjay Ghosh',
     fatherName: 'Ramesh Ghosh',
     mobile: '9876543214',
-    address: '56, Station Road, Halisahar',
+    address: '56, Station Road, Naihati',
     wardNumber: 8,
     district: 'North 24 Parganas',
     municipality: 'Halisahar'
@@ -54,7 +54,7 @@ const voterDetails = [
     name: 'Meera Banerjee',
     fatherName: 'Dipak Banerjee',
     mobile: '9876543215',
-    address: '23, Vivekananda Road, Halisahar',
+    address: '23, Vivekananda Road, Naihati',
     wardNumber: 15,
     district: 'North 24 Parganas',
     municipality: 'Halisahar'
@@ -64,7 +64,7 @@ const voterDetails = [
     name: 'Rahul Chatterjee',
     fatherName: 'Partha Chatterjee',
     mobile: '9876543216',
-    address: '89, Market Road, Halisahar',
+    address: '89, Market Road, Naihati',
     wardNumber: 10,
     district: 'North 24 Parganas',
     municipality: 'Halisahar'
@@ -74,7 +74,7 @@ const voterDetails = [
     name: 'Sunita Roy',
     fatherName: 'Ashok Roy',
     mobile: '9876543217',
-    address: '67, College Street, Halisahar',
+    address: '67, College Street, Naihati',
     wardNumber: 6,
     district: 'North 24 Parganas',
     municipality: 'Halisahar'
@@ -84,7 +84,7 @@ const voterDetails = [
     name: 'Vikram Dey',
     fatherName: 'Sunil Dey',
     mobile: '9876543218',
-    address: '101, Park Street, Halisahar',
+    address: '101, Park Street, Naihati',
     wardNumber: 9,
     district: 'North 24 Parganas',
     municipality: 'Halisahar'
@@ -94,7 +94,7 @@ const voterDetails = [
     name: 'Kavita Sengupta',
     fatherName: 'Bijoy Sengupta',
     mobile: '9876543219',
-    address: '45, Lake Road, Halisahar',
+    address: '45, Lake Road, Naihati',
     wardNumber: 14,
     district: 'North 24 Parganas',
     municipality: 'Halisahar'
@@ -104,7 +104,7 @@ const voterDetails = [
     name: 'Debasis Kar',
     fatherName: 'Ajit Kar',
     mobile: '9876543220',
-    address: '22, Hospital Road, Halisahar',
+    address: '22, Hospital Road, Naihati',
     wardNumber: 4,
     district: 'North 24 Parganas',
     municipality: 'Halisahar'
@@ -114,7 +114,7 @@ const voterDetails = [
     name: 'Rina Bhattacharya',
     fatherName: 'Kalyan Bhattacharya',
     mobile: '9876543221',
-    address: '88, Temple Road, Halisahar',
+    address: '88, Temple Road, Naihati',
     wardNumber: 11,
     district: 'North 24 Parganas',
     municipality: 'Halisahar'
@@ -124,7 +124,7 @@ const voterDetails = [
     name: 'Somnath Mondal',
     fatherName: 'Nirmal Mondal',
     mobile: '9876543222',
-    address: '55, River Bank Road, Halisahar',
+    address: '55, River Bank Road, Naihati',
     wardNumber: 1,
     district: 'North 24 Parganas',
     municipality: 'Halisahar'
@@ -134,7 +134,7 @@ const voterDetails = [
     name: 'Dipti Majumdar',
     fatherName: 'Tapan Majumdar',
     mobile: '9876543223',
-    address: '33, School Street, Halisahar',
+    address: '33, School Street, Naihati',
     wardNumber: 13,
     district: 'North 24 Parganas',
     municipality: 'Halisahar'
@@ -144,10 +144,10 @@ const voterDetails = [
     name: 'Ranjan Pal',
     fatherName: 'Gopal Pal',
     mobile: '9876543224',
-    address: '99, New Market, Halisahar',
+    address: '99, New Market, Naihati',
     wardNumber: 2,
     district: 'North 24 Parganas',
-    municipality: 'Halisahar'
+    municipality: 'Naihati'
   }
 ];
 
