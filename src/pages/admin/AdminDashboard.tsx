@@ -547,6 +547,7 @@ export default function AdminDashboard() {
                       <th className="text-left p-4 font-medium">Ward</th>
                       <th className="text-left p-4 font-medium">Status</th>
                       <th className="text-left p-4 font-medium">Date</th>
+                      <th className="text-left p-4 font-medium">User</th>
                       <th className="text-left p-4 font-medium">Action</th>
                     </tr>
                   </thead>
@@ -598,6 +599,41 @@ export default function AdminDashboard() {
                           </td>
                           <td className="p-4 text-sm text-muted-foreground">
                             {format(complaint.createdAt, 'dd MMM yyyy')}
+                          </td>
+                          <td className="p-4">
+                            {complaint.userId ? (
+                              <button
+                                className="text-primary underline"
+                                onClick={async () => {
+                                  try {
+                                    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users/${complaint.userId}` , {
+                                      headers: {
+                                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                                      },
+                                    });
+
+                                    if (!response.ok) {
+                                      const errorText = await response.text();
+                                      console.error('Failed to fetch user details:', errorText);
+                                      alert(`Error: ${response.status} - ${errorText}`);
+                                      return;
+                                    }
+
+                                    const userDetails = await response.json();
+                                    setSelectedUser(userDetails);
+                                    setShowUserModal(true);
+                                  } catch (error) {
+                                    // Log the error but avoid confusing the user with an alert
+                                    // because data may still be shown from a successful fetch.
+                                    console.error('Failed to fetch user details:', error);
+                                  }
+                                }}
+                              >
+                                View user
+                              </button>
+                            ) : (
+                              <span className="text-muted-foreground text-sm">User not found</span>
+                            )}
                           </td>
                           <td className="p-4 space-x-2">
                             <Button

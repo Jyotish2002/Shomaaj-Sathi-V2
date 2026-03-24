@@ -61,10 +61,10 @@ mongoose.connect(process.env.MONGODB_URI)
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-  if (!token) return res.sendStatus(401);
+  if (!token) return res.status(401).json({ message: 'Unauthorized: No token provided' });
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
+    if (err) return res.status(403).json({ message: 'Forbidden: Invalid token' });
     req.user = user;
     next();
   });
@@ -388,6 +388,9 @@ app.delete('/api/admin/users/:id', authenticateToken, async (req, res) => {
 app.get('/api/admin/complaints', authenticateToken, async (req, res) => {
   try {
     if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
+
+    // Return raw complaints with userId as the original reference.
+    // The frontend will use this ID to fetch full user details when needed.
     const complaints = await Complaint.find().sort({ createdAt: -1 });
     res.json(complaints);
   } catch (error) {
@@ -471,6 +474,23 @@ app.delete('/api/admin/clear-voters', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Clear error:', error);
     res.status(500).json({ message: 'Failed to clear voters' });
+  }
+});
+
+// Admin: Get User Details by ID (from User collection)
+app.get('/api/admin/users/:id', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') return res.status(403).json({ message: 'Unauthorized' });
+
+    const user = await User.findById(req.params.id).select(
+      'name mobile address epicNumber photo wardNumber district municipality email isVerified isProfileComplete'
+    );
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json(user);
+  } catch (error) {
+    console.error('Admin get user error:', error);
+    res.status(500).json({ message: error.message });
   }
 });
 
